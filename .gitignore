@@ -46,8 +46,18 @@ SourceArt/**/*.tga
 # Binary Files
 Binaries/*
 
+Intermediate/*
+Saved/*
+
 # Builds
 Build/*
+
+# Others
+*.mod
+*.log
+*.pdb
+*.VC.db
+
 
 # Don't ignore icon files in Build
 !Build/**/*.ico
