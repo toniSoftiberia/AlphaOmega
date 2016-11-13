@@ -23,6 +23,10 @@ public:
 	/** Public way to acces the battery power's level*/
 	float GetPower();
 
+
+	UFUNCTION(BlueprintCallable, Category = "Pickups")
+		void BatteryUpdateCollecting(bool NewState);
+
 protected:
 	/** Set the amount of power the battery gives to the player*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Power", Meta = (BlueprintProtected = "true"))

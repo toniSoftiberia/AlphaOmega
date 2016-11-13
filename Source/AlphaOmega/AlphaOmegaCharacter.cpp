@@ -179,6 +179,7 @@ void AAlphaOmegaCharacter::CollectPickups() {
 	if (CollectedPower > 0) {
 
 		UpdatePower(CollectedPower);
+		Collecting = true;
 	}
 }
 
@@ -203,4 +204,16 @@ void AAlphaOmegaCharacter::UpdatePower(float PowerChange) {
 
 	// Call visual effect
 	PowerChangeEffect();
+}
+
+// Reports if the player is collecting
+bool AAlphaOmegaCharacter::IsCollecting() {
+	return Collecting;
+}
+
+// Sets the new state to is collecting
+void AAlphaOmegaCharacter::UpdateCollecting(bool NewState) {
+
+	// Set new state
+	Collecting = NewState;
 }

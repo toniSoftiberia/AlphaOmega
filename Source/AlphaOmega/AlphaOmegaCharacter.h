@@ -79,6 +79,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Power", Meta = (BlueprintProtected = "true"))
 		float BaseSpeed;
 
+	/** Handles if the playar is collecting*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Pickups", Meta = (BlueprintProtected = "true"))
+		bool Collecting;
+
 	UFUNCTION(BlueprintImplementableEvent, Category = "Power")
 		void PowerChangeEffect();
 
@@ -104,10 +108,17 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Power")
 		float GetCurrentPower();
 
+	/** Accessor funtion for collecting state*/
+	UFUNCTION(BlueprintPure, Category = "Pickups")
+		bool IsCollecting();
+
 	/** Function to update the character's power
 	* @param PowerChange This is the amount to change the power by, and it can be positive or negative
 	*/
 	UFUNCTION(BlueprintCallable, Category = "Power")
 		void UpdatePower(float PowerChange);
+
+	UFUNCTION(BlueprintCallable, Category = "Pickups")
+		void UpdateCollecting(bool NewState);
 };
 

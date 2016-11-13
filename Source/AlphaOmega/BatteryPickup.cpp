@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "AlphaOmega.h"
+#include "AlphaOmegaCharacter.h"
 #include "BatteryPickup.h"
 
 
@@ -21,6 +22,10 @@ void ABatteryPickup::WasCollected_Implementation() {
 
 	// Destroy the battery
 	Destroy();
+
+	// Set new state
+	BatteryUpdateCollecting(false);
+
 }
 
 
@@ -28,4 +33,19 @@ void ABatteryPickup::WasCollected_Implementation() {
 float ABatteryPickup::GetPower() {
 
 	return BatteryPower;
+}
+
+
+
+
+
+// Sets the new state to is collecting
+void ABatteryPickup::BatteryUpdateCollecting(bool NewState) {
+
+	// Get player
+	AAlphaOmegaCharacter* MyCharacter = Cast<AAlphaOmegaCharacter>(UGameplayStatics::GetPlayerPawn(this, 0));
+	if (MyCharacter) {
+		// Set new state
+		MyCharacter->UpdateCollecting(false);
+	}
 }
