@@ -43,7 +43,7 @@ AAlphaOmegaCharacter::AAlphaOmegaCharacter()
 	CollectionSphere = CreateDefaultSubobject<USphereComponent>(TEXT("CollectionSphere"));
 	//CollectionSphere->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepWorldTransform, EAttachLocation::KeepWorldPosition);
 	CollectionSphere->AttachTo(RootComponent);
-	CollectionSphere->SetSphereRadius(200.f);
+	CollectionSphere->SetSphereRadius(500.f);
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
@@ -53,8 +53,8 @@ AAlphaOmegaCharacter::AAlphaOmegaCharacter()
 	CharacterPower = InitialPower;
 
 	// Set the dependence of the speed on the power level
-	SpeedFactor = 0.75f;
-	BaseSpeed = 10.f;
+	SpeedFactor = 0.35f;
+	BaseSpeed = 5.f;
 }
 
 //////////////////////////////////////////////////////////////////////////
