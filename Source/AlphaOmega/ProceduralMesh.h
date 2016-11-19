@@ -21,26 +21,12 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaSeconds) override;
 
-	void GenerateTriangle();
-
-	void GenerateQuad();
-
-	void GeneratePiramid();
-
-	void GenerateCube(FVector Size);
-
-	void GenerateTube(int radius, int height, int heightSections, int circleSections);
-
-	/*
-	void BuildQuad(
-	TArray<FVector>& Vertices,
-	TArray<int32>& Triangles,
-	FVector BottomLeft, FVector BottomRight, FVector TopRight, FVector TopLeft,
-	int32& VertexOffset,
-	int32& TriangleOffset,
-	FPackedNormal Normal,
-	FPackedNormal Tangent);
-	*/
+	void BuildTriangle(
+		FVector vertexA, FVector vertexB, FVector vertexC,
+		int32& VertexOffset,
+		int32& TriangleOffset,
+		FVector& normal,
+		FProcMeshTangent& tangent);
 
 	void BuildQuad(
 		FVector bottomLeft, FVector bottomRight, FVector topRight, FVector topLeft,
@@ -49,25 +35,27 @@ public:
 		FVector& Normal,
 		FProcMeshTangent& Tangent);
 
+	virtual void GenerateMesh();
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
 		UMaterialInterface* material;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Procedural Parameters")
 		UProceduralMeshComponent* mesh;
 
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Procedural Parameters")
 		TArray<FVector> vertices;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Procedural Parameters")
 		TArray<int32> triangles;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Procedural Parameters")
 		TArray<FVector> normals;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Procedural Parameters")
 		TArray<FVector2D> UV0s;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Procedural Parameters")
 		TArray<FProcMeshTangent> tangents;
 };
