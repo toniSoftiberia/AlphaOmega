@@ -101,15 +101,15 @@ void AProceduralTube::GenerateMesh() {
 		{
 			// Bottom cap
 			BuildTriangle(
-				pInit, p1, p0,
+				p1, p0, pInit,
 				VertexOffset,
 				TriangleOffset,
 				normal,
 				tangent);
 			
-			UV0s[UV0s.Num() - 3] = FVector2D(0.5f - (FMath::Cos(0) / 2.0f), 0.5f - (FMath::Sin(0) / 2.0f));
+			UV0s[UV0s.Num() - 1] = FVector2D(0.5f - (FMath::Cos(0) / 2.0f), 0.5f - (FMath::Sin(0) / 2.0f));
 			UV0s[UV0s.Num() - 2] = FVector2D(0.5f - (FMath::Cos(-Angle) / 2.0f), 0.5f - (FMath::Sin(-Angle) / 2.0f));
-			UV0s[UV0s.Num() - 1] = FVector2D(0.5f - (FMath::Cos(-NextAngle) / 2.0f), 0.5f - (FMath::Sin(-NextAngle) / 2.0f));
+			UV0s[UV0s.Num() - 3] = FVector2D(0.5f - (FMath::Cos(-NextAngle) / 2.0f), 0.5f - (FMath::Sin(-NextAngle) / 2.0f));
 			
 			NormalCurrent = FVector::CrossProduct(vertices[vertices.Num() - 3] - vertices[vertices.Num() - 1], vertices[vertices.Num() - 2] - vertices[vertices.Num() - 1]).GetSafeNormal();
 			normals[normals.Num() - 3] = normals[normals.Num() - 2] = normals[normals.Num() - 1] = NormalCurrent;
@@ -118,6 +118,7 @@ void AProceduralTube::GenerateMesh() {
 			FVector SurfaceTangent = p0 - p1;
 			SurfaceTangent = SurfaceTangent.GetSafeNormal();
 
+			
 			// Top cap
 			BuildTriangle(
 				pInit - Offset, p0 - Offset, p1 - Offset,
