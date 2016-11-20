@@ -7,14 +7,6 @@
 
 void AProceduralCube::GenerateMesh() {
 
-	// Set up mesh buffers
-	int32 vertexCount = 6 * 4; // 6 sides on a cube, 4 verts each
-	//vertices.AddUninitialized(vertexCount);
-	//triangles.AddUninitialized(6 * 2 * 3); // 2x triangles per cube side, 3 verts each
-	//UV0s.AddUninitialized(vertexCount);
-	//normals.AddUninitialized(vertexCount);
-	//tangents.AddUninitialized(vertexCount);
-
 	// Calculate a half offset so we get correct center of object
 	float OffsetX = cubeSize.X / 2.0f;
 	float OffsetY = cubeSize.Y / 2.0f;
