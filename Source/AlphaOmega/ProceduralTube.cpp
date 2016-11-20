@@ -19,48 +19,24 @@ void AProceduralTube::GenerateMesh() {
 	const float VMapPerQuad = 1.0f / (float)circleSections;
 	FVector Offset = FVector(0, 0, height);
 
+	FVector pInit = FVector(FMath::Cos(0) * radius, FMath::Sin(0) * radius, 0.f) + (Offset /2);
+	
 	for (int32 QuadIndex = 0; QuadIndex < circleSections; QuadIndex++)
 	{
 		float Angle = (float)QuadIndex * AngleBetweenQuads;
 		float NextAngle = (float)(QuadIndex + 1) * AngleBetweenQuads;
 
 		// Set up the vertices
-		FVector p0 = (FVector(FMath::Cos(Angle) * radius, FMath::Sin(Angle) * radius, 0.f)) + Offset / 2;
-		FVector p1 = (FVector(FMath::Cos(NextAngle) * radius, FMath::Sin(NextAngle) * radius, 0.f)) + Offset / 2;
+		FVector p0 = (FVector(FMath::Cos(Angle) * radius, FMath::Sin(Angle) * radius, 0.f)) + (Offset / 2);
+		FVector p1 = (FVector(FMath::Cos(NextAngle) * radius, FMath::Sin(NextAngle) * radius, 0.f)) + (Offset / 2);
 		FVector p2 = p1 - Offset;
 		FVector p3 = p0 - Offset;
 
 		BuildQuad(p0, p1, p2, p3, VertexOffset, TriangleOffset, normal, tangent);
-		/*
-		// Set up the quad triangles
-		int32 VertIndex1 = VertexOffset++;
-		int32 VertIndex2 = VertexOffset++;
-		int32 VertIndex3 = VertexOffset++;
-		int32 VertIndex4 = VertexOffset++;
-
-		vertices[VertIndex1] = p0;
-		vertices[VertIndex2] = p1;
-		vertices[VertIndex3] = p2;
-		vertices[VertIndex4] = p3;
-
-		// Now create two triangles from those four vertices
-		// The order of these (clockwise/counter-clockwise) dictates which way the normal will face. 
-		triangles[TriangleOffset++] = VertIndex4;
-		triangles[TriangleOffset++] = VertIndex3;
-		triangles[TriangleOffset++] = VertIndex1;
-
-		triangles[TriangleOffset++] = VertIndex3;
-		triangles[TriangleOffset++] = VertIndex2;
-		triangles[TriangleOffset++] = VertIndex1;
-		*/
 
 		if (useUniqueTexture)
 		{
 			// UVs.  Note that Unreal UV origin (0,0) is top left
-			/*UV0s[UV0s.Num() - 2] = FVector2D(1.0f - (VMapPerQuad * QuadIndex), 1.0f);
-			UV0s[UV0s.Num() - 1] = FVector2D(1.0f - (VMapPerQuad * (QuadIndex + 1)), 1.0f);
-			UV0s[UV0s.Num() - 4] = FVector2D(1.0f - (VMapPerQuad * (QuadIndex + 1)), 0.0f);
-			UV0s[UV0s.Num() - 3] = FVector2D(1.0f - (VMapPerQuad * QuadIndex), 0.0f);*/
 			UV0s[UV0s.Num() - 1] = FVector2D(1.0f - (VMapPerQuad * QuadIndex), 1.0f);
 			UV0s[UV0s.Num() - 2] = FVector2D(1.0f - (VMapPerQuad * (QuadIndex + 1)), 1.0f);
 			UV0s[UV0s.Num() - 3] = FVector2D(1.0f - (VMapPerQuad * (QuadIndex + 1)), 0.0f);
@@ -96,15 +72,11 @@ void AProceduralTube::GenerateMesh() {
 				AverageNormalLeft = AverageNormalLeft.GetSafeNormal();
 			}
 			else {
-
-				// p1 to p4 to p2
 				// p3 to p4 to p1
 				FVector NormalNext = FVector::CrossProduct(p3 - p1, p4 - p1).GetSafeNormal();
 				AverageNormalRight = (NormalCurrent + NormalNext) / 2;
 				AverageNormalRight = AverageNormalRight.GetSafeNormal();
 
-
-				// p0 to p3 to pMinus1
 				// p2 to p0 to pMinus1
 				FVector NormalPrevious = FVector::CrossProduct(p2 - pMinus1, p0 - pMinus1).GetSafeNormal();
 				AverageNormalLeft = (NormalCurrent + NormalPrevious) / 2;
@@ -120,6 +92,47 @@ void AProceduralTube::GenerateMesh() {
 		{
 			// If not smoothing we just set the vertex normal to the same normal as the polygon they belong to
 			normals[normals.Num() - 4] = normals[normals.Num() - 3] = normals[normals.Num() - 2] = normals[normals.Num() - 1] = NormalCurrent;
+		}
+
+		// -------------------------------------------------------
+		// Caps are closed here by triangles that start at 0, then use the points along the circle for the other two corners.
+		// A better looking method uses a vertex in the center of the circle, but uses two more polygons.  We will demonstrate that in a different sample.
+		if (QuadIndex != 0 && addCaps)
+		{
+			// Bottom cap
+			BuildTriangle(
+				pInit, p1, p0,
+				VertexOffset,
+				TriangleOffset,
+				normal,
+				tangent);
+			
+			UV0s[UV0s.Num() - 3] = FVector2D(0.5f - (FMath::Cos(0) / 2.0f), 0.5f - (FMath::Sin(0) / 2.0f));
+			UV0s[UV0s.Num() - 2] = FVector2D(0.5f - (FMath::Cos(-Angle) / 2.0f), 0.5f - (FMath::Sin(-Angle) / 2.0f));
+			UV0s[UV0s.Num() - 1] = FVector2D(0.5f - (FMath::Cos(-NextAngle) / 2.0f), 0.5f - (FMath::Sin(-NextAngle) / 2.0f));
+			
+			NormalCurrent = FVector::CrossProduct(vertices[vertices.Num() - 3] - vertices[vertices.Num() - 1], vertices[vertices.Num() - 2] - vertices[vertices.Num() - 1]).GetSafeNormal();
+			normals[normals.Num() - 3] = normals[normals.Num() - 2] = normals[normals.Num() - 1] = NormalCurrent;
+
+			// Tangents (perpendicular to the surface)
+			FVector SurfaceTangent = p0 - p1;
+			SurfaceTangent = SurfaceTangent.GetSafeNormal();
+
+			// Top cap
+			BuildTriangle(
+				pInit - Offset, p0 - Offset, p1 - Offset,
+				VertexOffset,
+				TriangleOffset,
+				normal,
+				tangent);
+
+			UV0s[UV0s.Num() - 3] = FVector2D(0.5f - (FMath::Cos(0) / 2.0f), 0.5f - (FMath::Sin(0) / 2.0f));
+			UV0s[UV0s.Num() - 2] = FVector2D(0.5f - (FMath::Cos(-Angle) / 2.0f), 0.5f - (FMath::Sin(-Angle) / 2.0f));
+			UV0s[UV0s.Num() - 1] = FVector2D(0.5f - (FMath::Cos(-NextAngle) / 2.0f), 0.5f - (FMath::Sin(-NextAngle) / 2.0f));
+
+			NormalCurrent = FVector::CrossProduct(vertices[vertices.Num() - 3] - vertices[vertices.Num() - 1], vertices[vertices.Num() - 2] - vertices[vertices.Num() - 1]).GetSafeNormal();
+			normals[normals.Num() - 3] = normals[normals.Num() - 2] = normals[normals.Num() - 1] = NormalCurrent;
+			
 		}
 	}
 }

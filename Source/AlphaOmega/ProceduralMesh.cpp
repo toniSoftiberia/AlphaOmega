@@ -24,6 +24,22 @@ AProceduralMesh::AProceduralMesh()
 	mesh->ClearAllCachedCookedPlatformData();
 
 }
+
+/*
+void AProceduralMesh::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+
+	// We need to re-construct the buffers since values can be changed in editor
+
+	//GenerateMesh();
+
+	//mesh->CreateMeshSection(1, vertices, triangles, normals, UV0s, TArray<FColor>(), TArray<FProcMeshTangent>(), false);
+
+	//mesh->UpdateMeshSection(1, vertices, normals, UV0, vertexColors, tangents);
+
+	//mesh->SetMaterial(1, material);
+}*/
 #endif // WITH_EDITOR
 
 // Called when the game starts or when spawned
