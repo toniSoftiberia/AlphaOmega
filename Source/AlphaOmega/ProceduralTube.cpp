@@ -12,14 +12,18 @@ void AProceduralTube::GenerateMesh() {
 	int32 TriangleOffset = 0;
 	FVector normal = FVector();
 	FProcMeshTangent tangent = FProcMeshTangent(1, 1, 1);
-	
+
+	GenerateTube(FVector::ZeroVector, FVector(0, 0, height), VertexOffset, TriangleOffset, normal, tangent);
+}
+
+void AProceduralTube::GenerateTube(FVector StartPoint, FVector EndPoint, int32 VertexOffset, int32 TriangleOffset, FVector normal, FProcMeshTangent tangent) {
 
 	// Make a cylinder section
 	const float AngleBetweenQuads = (2.0f / (float)(circleSections)) * PI;
 	const float VMapPerQuad = 1.0f / (float)circleSections;
-	FVector Offset = FVector(0, 0, height);
 
-	FVector pInit = FVector(FMath::Cos(0) * radius, FMath::Sin(0) * radius, 0.f) + (Offset /2);
+	FVector pInit = FVector(FMath::Cos(0) * radius, FMath::Sin(0) * radius, 0.f);
+	FVector offset = EndPoint - StartPoint;
 	
 	for (int32 QuadIndex = 0; QuadIndex < circleSections; QuadIndex++)
 	{
@@ -27,10 +31,10 @@ void AProceduralTube::GenerateMesh() {
 		float NextAngle = (float)(QuadIndex + 1) * AngleBetweenQuads;
 
 		// Set up the vertices
-		FVector p0 = (FVector(FMath::Cos(Angle) * radius, FMath::Sin(Angle) * radius, 0.f)) + (Offset / 2);
-		FVector p1 = (FVector(FMath::Cos(NextAngle) * radius, FMath::Sin(NextAngle) * radius, 0.f)) + (Offset / 2);
-		FVector p2 = p1 - Offset;
-		FVector p3 = p0 - Offset;
+		FVector p0 = (FVector(FMath::Cos(Angle) * radius, FMath::Sin(Angle) * radius, 0.f)) + StartPoint;
+		FVector p1 = (FVector(FMath::Cos(NextAngle) * radius, FMath::Sin(NextAngle) * radius, 0.f)) + StartPoint;
+		FVector p2 = p1 - offset;
+		FVector p3 = p0 - offset;
 
 		BuildQuad(p0, p1, p2, p3, VertexOffset, TriangleOffset, normal, tangent);
 
@@ -121,7 +125,7 @@ void AProceduralTube::GenerateMesh() {
 			
 			// Top cap
 			BuildTriangle(
-				pInit - Offset, p0 - Offset, p1 - Offset,
+				pInit - offset, p0 - offset, p1 - offset,
 				VertexOffset,
 				TriangleOffset,
 				normal,

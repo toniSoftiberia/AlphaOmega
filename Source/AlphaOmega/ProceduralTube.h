@@ -27,9 +27,6 @@ public:
 		int32 circleSections;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
-		int32 heightSections;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
 		bool smoothNormals;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
@@ -40,6 +37,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
 		bool addCaps;
-	
+
+	virtual void GenerateTube(FVector StartPoint, FVector EndPoint, int32 VertexOffset, int32 TriangleOffset, FVector normal, FProcMeshTangent tangent);
 	
 };
