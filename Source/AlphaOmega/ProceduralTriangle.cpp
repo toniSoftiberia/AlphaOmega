@@ -20,5 +20,12 @@ void AProceduralTriangle::GenerateMesh() {
 		triangleOffset,
 		normal,
 		tangent);
+
+	BuildTriangle(
+		vertexA+50, vertexB+50, vertexC+50,
+		vertexOffset,
+		triangleOffset,
+		normal,
+		tangent);
 }
 

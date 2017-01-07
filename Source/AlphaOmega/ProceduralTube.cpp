@@ -16,13 +16,13 @@ void AProceduralTube::GenerateMesh() {
 	GenerateTube(FVector::ZeroVector, FVector(0, 0, height), VertexOffset, TriangleOffset, normal, tangent);
 }
 
-void AProceduralTube::GenerateTube(FVector StartPoint, FVector EndPoint, int32 VertexOffset, int32 TriangleOffset, FVector normal, FProcMeshTangent tangent) {
+void AProceduralTube::GenerateTube(FVector StartPoint, FVector EndPoint, int32 &VertexOffset, int32 &TriangleOffset, FVector normal, FProcMeshTangent tangent) {
 
 	// Make a cylinder section
 	const float AngleBetweenQuads = (2.0f / (float)(circleSections)) * PI;
 	const float VMapPerQuad = 1.0f / (float)circleSections;
 
-	FVector pInit = FVector(FMath::Cos(0) * radius, FMath::Sin(0) * radius, 0.f);
+	FVector pInit = FVector(FMath::Cos(0) * radius, FMath::Sin(0) * radius, 0.f) + StartPoint;
 	FVector offset = EndPoint - StartPoint;
 	
 	for (int32 QuadIndex = 0; QuadIndex < circleSections; QuadIndex++)
@@ -105,16 +105,16 @@ void AProceduralTube::GenerateTube(FVector StartPoint, FVector EndPoint, int32 V
 		{
 			// Bottom cap
 			BuildTriangle(
-				p1, p0, pInit,
+				pInit - offset, p3, p2,
 				VertexOffset,
 				TriangleOffset,
 				normal,
 				tangent);
-			
-			UV0s[UV0s.Num() - 1] = FVector2D(0.5f - (FMath::Cos(0) / 2.0f), 0.5f - (FMath::Sin(0) / 2.0f));
+
+			UV0s[UV0s.Num() - 3] = FVector2D(0.5f - (FMath::Cos(0) / 2.0f), 0.5f - (FMath::Sin(0) / 2.0f));
 			UV0s[UV0s.Num() - 2] = FVector2D(0.5f - (FMath::Cos(-Angle) / 2.0f), 0.5f - (FMath::Sin(-Angle) / 2.0f));
-			UV0s[UV0s.Num() - 3] = FVector2D(0.5f - (FMath::Cos(-NextAngle) / 2.0f), 0.5f - (FMath::Sin(-NextAngle) / 2.0f));
-			
+			UV0s[UV0s.Num() - 1] = FVector2D(0.5f - (FMath::Cos(-NextAngle) / 2.0f), 0.5f - (FMath::Sin(-NextAngle) / 2.0f));
+
 			NormalCurrent = FVector::CrossProduct(vertices[vertices.Num() - 3] - vertices[vertices.Num() - 1], vertices[vertices.Num() - 2] - vertices[vertices.Num() - 1]).GetSafeNormal();
 			normals[normals.Num() - 3] = normals[normals.Num() - 2] = normals[normals.Num() - 1] = NormalCurrent;
 
@@ -125,15 +125,15 @@ void AProceduralTube::GenerateTube(FVector StartPoint, FVector EndPoint, int32 V
 			
 			// Top cap
 			BuildTriangle(
-				pInit - offset, p0 - offset, p1 - offset,
+				p1, p0, pInit,
 				VertexOffset,
 				TriangleOffset,
 				normal,
 				tangent);
 
-			UV0s[UV0s.Num() - 3] = FVector2D(0.5f - (FMath::Cos(0) / 2.0f), 0.5f - (FMath::Sin(0) / 2.0f));
+			UV0s[UV0s.Num() - 1] = FVector2D(0.5f - (FMath::Cos(0) / 2.0f), 0.5f - (FMath::Sin(0) / 2.0f));
 			UV0s[UV0s.Num() - 2] = FVector2D(0.5f - (FMath::Cos(-Angle) / 2.0f), 0.5f - (FMath::Sin(-Angle) / 2.0f));
-			UV0s[UV0s.Num() - 1] = FVector2D(0.5f - (FMath::Cos(-NextAngle) / 2.0f), 0.5f - (FMath::Sin(-NextAngle) / 2.0f));
+			UV0s[UV0s.Num() - 3] = FVector2D(0.5f - (FMath::Cos(-NextAngle) / 2.0f), 0.5f - (FMath::Sin(-NextAngle) / 2.0f));
 
 			NormalCurrent = FVector::CrossProduct(vertices[vertices.Num() - 3] - vertices[vertices.Num() - 1], vertices[vertices.Num() - 2] - vertices[vertices.Num() - 1]).GetSafeNormal();
 			normals[normals.Num() - 3] = normals[normals.Num() - 2] = normals[normals.Num() - 1] = NormalCurrent;

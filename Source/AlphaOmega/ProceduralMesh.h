@@ -64,4 +64,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
 		UMaterialInterface* material;
+
+
+	FVector RotatePointAroundPivot(FVector InPoint, FVector InPivot, FVector InAngles);
 };

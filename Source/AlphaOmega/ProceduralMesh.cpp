@@ -146,4 +146,9 @@ void AProceduralMesh::BuildQuad(
 	tangents.Add(Tangent);
 }
 
-
+FVector AProceduralMesh::RotatePointAroundPivot(FVector InPoint, FVector InPivot, FVector InAngles)
+{
+	FVector direction = InPoint - InPivot; // get point direction relative to pivot
+	direction = FQuat::MakeFromEuler(InAngles) * direction; // rotate it
+	return direction + InPivot; // calculate rotated point
+}

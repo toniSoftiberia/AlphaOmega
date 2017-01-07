@@ -38,6 +38,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
 		bool addCaps;
 
-	virtual void GenerateTube(FVector StartPoint, FVector EndPoint, int32 VertexOffset, int32 TriangleOffset, FVector normal, FProcMeshTangent tangent);
+	virtual void GenerateTube(FVector StartPoint, FVector EndPoint, int32 &VertexOffset, int32 &TriangleOffset, FVector normal, FProcMeshTangent tangent);
 	
 };

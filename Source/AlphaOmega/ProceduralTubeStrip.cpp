@@ -2,6 +2,7 @@
 
 #include "AlphaOmega.h"
 #include "ProceduralTubeStrip.h"
+#include "ProceduralPrisma.h"
 
 void AProceduralTubeStrip::GenerateMesh() {
 
@@ -11,7 +12,12 @@ void AProceduralTubeStrip::GenerateMesh() {
 	FVector normal = FVector();
 	FProcMeshTangent tangent = FProcMeshTangent(1, 1, 1);
 
-	GenerateTube(FVector::ZeroVector, FVector(0, 0, height), VertexOffset, TriangleOffset, normal, tangent);
-	GenerateTube(FVector(0, 100, height), FVector(0, 100, height), VertexOffset, TriangleOffset, normal, tangent);
+	float radius1 = 50.0f;
+	float radius2 = 20.0f;
+	float radius3 = 30.0f;
+	FVector rotationMiddle = FVector(0, 15, 0);
+
+	GeneratePrisma(FVector::ZeroVector, FVector(0, 0, height/2), radius1, radius2, FVector::ZeroVector, rotationMiddle, VertexOffset, TriangleOffset, normal, tangent);
+	GeneratePrisma(FVector(0, 0, height / 2), FVector(0, 0, height), radius2, radius3, rotationMiddle, FVector::ZeroVector, VertexOffset, TriangleOffset, normal, tangent);
 }
 
