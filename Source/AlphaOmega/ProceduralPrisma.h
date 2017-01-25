@@ -17,23 +17,33 @@ class ALPHAOMEGA_API AProceduralPrisma : public AProceduralMesh
 
 public:
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
-		float height;
+	// Prima attributes
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
-		float radiusSup;
+		FVector startPoint;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
-		float radiusInf;
+		FVector endPoint;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
-		FVector rotationSup;
+		FVector startRotation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
-		FVector rotationInf;
+		FVector endRotation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
+		float startRadius;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
+		float endRadius;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
 		int32 circleSections;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
+		bool addCaps;
+
+	// Common attributes
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
 		bool smoothNormals;
@@ -44,10 +54,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
 		bool useUniqueTexture;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
-		bool addCaps;
 
-
-	virtual void GeneratePrisma(FVector StartPoint, FVector EndPoint, float radiusInf, float radiusSup, FVector rotationInf, FVector rotationSup, int32 &VertexOffset, int32 &TriangleOffset, FVector normal, FProcMeshTangent tangent);
+	virtual void GeneratePrisma(FVector StartPoint, FVector EndPoint, FVector rotationInf, FVector rotationSup, float radiusInf, float radiusSup, int32 &VertexOffset, int32 &TriangleOffset, FVector normal, FProcMeshTangent tangent);
 
 };
