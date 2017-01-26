@@ -59,6 +59,21 @@ void AProceduralPrisma::GeneratePrisma(FVector startPoint, FVector endPoint, FVe
 
 	// Get prisma orientation and flip it to get its perpendicular
 	FVector orientation = endPoint - startPoint;
+	if(endPoint.Y > startPoint.Y)
+		orientation = startPoint - endPoint;
+
+	float direction = (FVector::DotProduct(endPoint, startPoint));
+
+	UE_LOG(LogClass, Log, TEXT("endPoint %s"), *endPoint.ToString());
+	UE_LOG(LogClass, Log, TEXT("startPoint %s"), *startPoint.ToString());
+	UE_LOG(LogClass, Log, TEXT("GetSafeNormal %s"), *orientation.GetSafeNormal().ToString());
+	UE_LOG(LogClass, Log, TEXT("GetUnsafeNormal %s"), *orientation.GetUnsafeNormal().ToString());
+	UE_LOG(LogClass, Log, TEXT("SafeSize %F"), orientation.GetSafeNormal().Size());
+	UE_LOG(LogClass, Log, TEXT("UnsafeSize %F"), orientation.GetUnsafeNormal().Size());
+	UE_LOG(LogClass, Log, TEXT("DotProduct %F"), direction);
+
+
+
 
 	orientation = orientation.Rotation().Add(90.f, 0.f, 0.f).Euler();
 
@@ -89,7 +104,7 @@ void AProceduralPrisma::GeneratePrisma(FVector startPoint, FVector endPoint, FVe
 		p3 = RotatePointAroundPivot(p3, startPoint, startRotation + orientation);
 
 		BuildQuad(p1, p0, p3, p2, VertexOffset, TriangleOffset, normal, tangent);
-
+		
 		if (useUniqueTexture)
 		{
 			// UVs.  Note that Unreal UV origin (0,0) is top left
