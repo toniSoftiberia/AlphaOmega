@@ -30,6 +30,9 @@ protected:
 		TArray<FVector> vertices;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Procedural Parameters")
+		TArray<FProcMeshVertex> verticesComplete;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Procedural Parameters")
 		TArray<int32> triangles;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Procedural Parameters")

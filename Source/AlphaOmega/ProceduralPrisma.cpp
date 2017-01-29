@@ -10,72 +10,26 @@ void AProceduralPrisma::GenerateMesh() {
 	int32 VertexOffset = 0;
 	int32 TriangleOffset = 0;
 	FVector normal = FVector();
-	FProcMeshTangent tangent = FProcMeshTangent(1, 1, 1);
+	//FProcMeshTangent tangent = FProcMeshTangent(1, 1, 1);
+	FProcMeshTangent tangent = FProcMeshTangent(0,0,0);
 
 	GeneratePrisma(startPoint, endPoint, startRotation, endRotation, startRadius, endRadius, VertexOffset, TriangleOffset, normal, tangent);
 }
 
 void AProceduralPrisma::GeneratePrisma(FVector startPoint, FVector endPoint, FVector startRotation, FVector endRotation, float startRadius, float endRadius, int32 &VertexOffset, int32 &TriangleOffset, FVector normal, FProcMeshTangent tangent) {
-/*
-	// Get prisma orientation and flip it to get its perpendicular
-	FVector orientation = endPoint - startPoint;
-
-	
-	UE_LOG(LogClass, Log, TEXT("orientation           : %s"), *orientation.ToString());
-	//orientation.Rotation().Add(0.f, 0.f, 90.f).Euler();
-
-	
-	FVector orthogonal = FVector(1, 3, 0);
-
-	if (orientation.Z != 0)
-		orthogonal.Z = -(orientation.X * orthogonal.X + orientation.Y * orthogonal.Y) / orientation.Z;
-	else
-		orthogonal.Z = orientation.X * orthogonal.X + orientation.Y * orthogonal.Y;
-
-	orientation = orthogonal;
-
-	UE_LOG(LogClass, Log, TEXT("orientation.Z %f"), orientation.Z);
-	UE_LOG(LogClass, Log, TEXT("orientation.Y %f"), orientation.Y);
-	UE_LOG(LogClass, Log, TEXT("orientation.X %f"), orientation.X);
-	UE_LOG(LogClass, Log, TEXT("orthogonal.Z %f"), orthogonal.Z);
-	UE_LOG(LogClass, Log, TEXT("orthogonal.Y %f"), orthogonal.Y);
-	UE_LOG(LogClass, Log, TEXT("orthogonal.X %f"), orthogonal.X);
-
-	orientation.Normalize();
-	UE_LOG(LogClass, Log, TEXT("orientation Normalized: %s"), *orientation.ToString());
-	
-	FVector orientationFinal = FVector::CrossProduct(orientation, FVector(0, 0, 1));
-	UE_LOG(LogClass, Log, TEXT("orientation Cross pro1: %s"), *orientationFinal.ToString());
-	
-	if (orientationFinal == FVector::ZeroVector) {
-		orientationFinal = FVector::CrossProduct(orientation, FVector(0, 1, 0));
-		UE_LOG(LogClass, Log, TEXT("orientation Cross pro2: %s"), *orientationFinal.ToString());
-		if (orientationFinal == FVector::ZeroVector) {
-			orientationFinal = FVector::CrossProduct(orientation, FVector(1, 0, 1));
-			UE_LOG(LogClass, Log, TEXT("orientation Cross pro3: %s"), *orientationFinal.ToString());
-		}
-	}*/
-
 
 	// Get prisma orientation and flip it to get its perpendicular
-	FVector orientation = endPoint - startPoint;
-	if(endPoint.Y > startPoint.Y)
-		orientation = startPoint - endPoint;
+	FVector orientation = FVector::ZeroVector;
 
-	float direction = (FVector::DotProduct(endPoint, startPoint));
+	if (endRotation == FVector::ZeroVector || startRotation == FVector::ZeroVector) {
+		orientation = endPoint - startPoint;
+	}
+	else {
+		orientation = FVector::ZeroVector;
+	}
 
-	UE_LOG(LogClass, Log, TEXT("endPoint %s"), *endPoint.ToString());
-	UE_LOG(LogClass, Log, TEXT("startPoint %s"), *startPoint.ToString());
-	UE_LOG(LogClass, Log, TEXT("GetSafeNormal %s"), *orientation.GetSafeNormal().ToString());
-	UE_LOG(LogClass, Log, TEXT("GetUnsafeNormal %s"), *orientation.GetUnsafeNormal().ToString());
-	UE_LOG(LogClass, Log, TEXT("SafeSize %F"), orientation.GetSafeNormal().Size());
-	UE_LOG(LogClass, Log, TEXT("UnsafeSize %F"), orientation.GetUnsafeNormal().Size());
-	UE_LOG(LogClass, Log, TEXT("DotProduct %F"), direction);
-
-
-
-
-	orientation = orientation.Rotation().Add(90.f, 0.f, 0.f).Euler();
+	if (startRotation == FVector::ZeroVector)
+		startRotation = orientation;
 
 	// Make a cylinder section
 	const float AngleBetweenQuads = (2.0f / (float)(circleSections)) * PI;
@@ -83,8 +37,8 @@ void AProceduralPrisma::GeneratePrisma(FVector startPoint, FVector endPoint, FVe
 	
 	FVector pInitStart = FVector(FMath::Cos(0) * startRadius, FMath::Sin(0) * startRadius, 0.f) + startPoint;
 	FVector pInitEnd = FVector(FMath::Cos(0) * endRadius, FMath::Sin(0) * endRadius, 0.f) + endPoint;
-	pInitStart = RotatePointAroundPivot(pInitStart, startPoint, startRotation + orientation);
-	pInitEnd = RotatePointAroundPivot(pInitEnd, endPoint, endRotation + orientation);
+	pInitStart = RotatePointAroundPivot(pInitStart, startPoint, (startRotation + orientation).Rotation().Add(90.f, 0.f, 0.f).Euler());
+	pInitEnd = RotatePointAroundPivot(pInitEnd, endPoint, (endRotation + orientation).Rotation().Add(90.f, 0.f, 0.f).Euler());
 
 	for (int32 QuadIndex = 0; QuadIndex < circleSections; QuadIndex++)
 	{
@@ -92,19 +46,32 @@ void AProceduralPrisma::GeneratePrisma(FVector startPoint, FVector endPoint, FVe
 		float NextAngle = (float)(QuadIndex + 1) * AngleBetweenQuads;
 
 		// Set up the vertices
-		FVector p0 = (FVector(FMath::Cos(Angle) * endRadius, FMath::Sin(Angle) * endRadius, 0.f)) + endPoint;
-		FVector p1 = (FVector(FMath::Cos(NextAngle) * endRadius, FMath::Sin(NextAngle) * endRadius, 0.f)) + endPoint;
+		FVector p0 = (FVector(FMath::Cos(NextAngle) * endRadius, FMath::Sin(NextAngle) * endRadius, 0.f)) + endPoint;
+		FVector p1 = (FVector(FMath::Cos(Angle) * endRadius, FMath::Sin(Angle) * endRadius, 0.f)) + endPoint;
 		FVector p2 = (FVector(FMath::Cos(NextAngle) * startRadius, FMath::Sin(NextAngle) * startRadius, 0.f)) + startPoint;
 		FVector p3 = (FVector(FMath::Cos(Angle) * startRadius, FMath::Sin(Angle) * startRadius, 0.f)) + startPoint;
-
-
-		p0 = RotatePointAroundPivot(p0, endPoint, endRotation + orientation);
-		p1 = RotatePointAroundPivot(p1, endPoint, endRotation + orientation);
-		p2 = RotatePointAroundPivot(p2, startPoint, startRotation + orientation);
-		p3 = RotatePointAroundPivot(p3, startPoint, startRotation + orientation);
-
-		BuildQuad(p1, p0, p3, p2, VertexOffset, TriangleOffset, normal, tangent);
 		
+		p0 = RotatePointAroundPivot(p0, endPoint, (endRotation + orientation).Rotation().Add(90.f, 0.f, 0.f).Euler());
+		p1 = RotatePointAroundPivot(p1, endPoint, (endRotation + orientation).Rotation().Add(90.f, 0.f, 0.f).Euler());
+
+		if (endPoint.Z == startPoint.Z || orientation != FVector::ZeroVector) {
+			p2 = RotatePointAroundPivot(p2, startPoint, (startRotation + orientation).Rotation().Add(90.f, 0.f, 0.f).Euler());
+			p3 = RotatePointAroundPivot(p3, startPoint, (startRotation + orientation).Rotation().Add(90.f, 0.f, 0.f).Euler());
+		}
+		else {
+			if (endPoint.Z > startPoint.Z) {
+				p2 = RotatePointAroundPivot(p2, startPoint, (startRotation + orientation).Rotation().Add(180.f, -180.f, -0.f).Euler());
+				p3 = RotatePointAroundPivot(p3, startPoint, (startRotation + orientation).Rotation().Add(180.f, -180.f, -0.f).Euler());
+			}
+			else {
+				p2 = RotatePointAroundPivot(p2, startPoint, (startRotation + orientation).Rotation().Add(0.f, 180.f, 0.f).Euler());
+				p3 = RotatePointAroundPivot(p3, startPoint, (startRotation + orientation).Rotation().Add(0.f, 180.f, 0.f).Euler());
+
+			}
+		}
+
+		BuildQuad(p0, p1, p3, p2, VertexOffset, TriangleOffset, normal, tangent);
+
 		if (useUniqueTexture)
 		{
 			// UVs.  Note that Unreal UV origin (0,0) is top left
@@ -115,7 +82,8 @@ void AProceduralPrisma::GeneratePrisma(FVector startPoint, FVector endPoint, FVe
 		}
 
 		// Calculate face normal
-		FVector NormalCurrent = FVector::CrossProduct(vertices[vertices.Num() - 4] - vertices[vertices.Num() - 2], vertices[vertices.Num() - 3] - vertices[vertices.Num() - 2]).GetSafeNormal();
+		//FVector NormalCurrent = FVector::CrossProduct(vertices[vertices.Num() - 4] - vertices[vertices.Num() - 2], vertices[vertices.Num() - 1] - vertices[vertices.Num() - 2]).GetSafeNormal();
+		FVector NormalCurrent = FVector::CrossProduct(vertices[vertices.Num() - 4] - vertices[vertices.Num() - 2], vertices[vertices.Num() - 1] - vertices[vertices.Num() - 2]).GetSafeNormal();
 		
 		if (smoothNormals || invertedSmoothNormals)
 		{
@@ -129,35 +97,42 @@ void AProceduralPrisma::GeneratePrisma(FVector startPoint, FVector endPoint, FVe
 			float PreviousAngle = (float)(QuadIndex - 1) * AngleBetweenQuads;
 			FVector pMinus1 = FVector(FMath::Cos(PreviousAngle) * startRadius, FMath::Sin(PreviousAngle) * startRadius, 0.f);
 
-			FVector AverageNormalRight, AverageNormalLeft;
+			FVector AverageNormalRight, AverageNormalLeft, NormalNext, NormalPrevious;
 
 			if (!invertedSmoothNormals) {
 				// p1 to p4 to p2
-				FVector NormalNext = FVector::CrossProduct(p1 - p2, p4 - p2).GetSafeNormal();
+				NormalNext = FVector::CrossProduct(p1 - p2, p4 - p2).GetSafeNormal();
 				AverageNormalRight = (NormalCurrent + NormalNext) / 2;
 				AverageNormalRight = AverageNormalRight.GetSafeNormal();
 
 				// p0 to p3 to pMinus1
-				FVector NormalPrevious = FVector::CrossProduct(p0 - pMinus1, p3 - pMinus1).GetSafeNormal();
+				NormalPrevious = FVector::CrossProduct(p0 - pMinus1, p3 - pMinus1).GetSafeNormal();
 				AverageNormalLeft = (NormalCurrent + NormalPrevious) / 2;
 				AverageNormalLeft = AverageNormalLeft.GetSafeNormal();
 			}
 			else {
-				// p3 to p4 to p1
-				FVector NormalNext = FVector::CrossProduct(p3 - p1, p4 - p1).GetSafeNormal();
+				// p1 to p3 to p4
+				NormalNext = FVector::CrossProduct(p2 - p3, p4 - p3).GetSafeNormal();
 				AverageNormalRight = (NormalCurrent + NormalNext) / 2;
 				AverageNormalRight = AverageNormalRight.GetSafeNormal();
 
-				// p2 to p0 to pMinus1
-				FVector NormalPrevious = FVector::CrossProduct(p2 - pMinus1, p0 - pMinus1).GetSafeNormal();
+				// pMinus1 to p3 to p2
+				NormalPrevious = FVector::CrossProduct(pMinus1 - p3, p2 - p3).GetSafeNormal();
 				AverageNormalLeft = (NormalCurrent + NormalPrevious) / 2;
 				AverageNormalLeft = AverageNormalLeft.GetSafeNormal();
 			}
+			normals[normals.Num() - 4] = NormalNext;
+			normals[normals.Num() - 3] = NormalPrevious;
+			normals[normals.Num() - 2] = NormalPrevious;
+			normals[normals.Num() - 1] = NormalNext;
 
-			normals[normals.Num() - 4] = AverageNormalLeft;
-			normals[normals.Num() - 3] = AverageNormalRight;
-			normals[normals.Num() - 2] = AverageNormalRight;
-			normals[normals.Num() - 1] = AverageNormalLeft;
+			/*
+		FVector p0 = (FVector(FMath::Cos(NextAngle) * endRadius, FMath::Sin(NextAngle) * endRadius, 0.f)) + endPoint;
+		FVector p1 = (FVector(FMath::Cos(Angle) * endRadius, FMath::Sin(Angle) * endRadius, 0.f)) + endPoint;
+		FVector p2 = (FVector(FMath::Cos(NextAngle) * startRadius, FMath::Sin(NextAngle) * startRadius, 0.f)) + startPoint;
+		FVector p3 = (FVector(FMath::Cos(Angle) * startRadius, FMath::Sin(Angle) * startRadius, 0.f)) + startPoint;*/
+
+
 		}
 		else
 		{
@@ -185,18 +160,19 @@ void AProceduralPrisma::GeneratePrisma(FVector startPoint, FVector endPoint, FVe
 			UV0s[UV0s.Num() - 2] = FVector2D(0.5f - (FMath::Cos(-NextAngle) / 2.0f), 0.5f - (FMath::Sin(-NextAngle) / 2.0f));
 			UV0s[UV0s.Num() - 1] = FVector2D(0.5f - (FMath::Cos(-Angle) / 2.0f), 0.5f - (FMath::Sin(-Angle) / 2.0f));
 
-			NormalCurrent = FVector::CrossProduct(vertices[vertices.Num() - 3] - vertices[vertices.Num() - 1], vertices[vertices.Num() - 2] - vertices[vertices.Num() - 1]).GetSafeNormal();
+			//NormalCurrent = FVector::CrossProduct(vertices[vertices.Num() - 3] - vertices[vertices.Num() - 1], vertices[vertices.Num() - 2] - vertices[vertices.Num() - 1]).GetSafeNormal();
+			NormalCurrent = orientation.GetSafeNormal();
 			normals[normals.Num() - 3] = normals[normals.Num() - 2] = normals[normals.Num() - 1] = NormalCurrent;
 			
 			// Tangents (perpendicular to the surface)
-			FVector SurfaceTangent = p0 - p1;
+			FVector SurfaceTangent = p1 - p0;
 			SurfaceTangent = SurfaceTangent.GetSafeNormal();
 			
 			
 			// End cap
 			BuildTriangle(
 				//p1, p0, pInitSup,
-				p0,  p1, pInitEnd, 
+				p1, p0, pInitEnd, 
 				VertexOffset,
 				TriangleOffset,
 				normal,
@@ -206,7 +182,7 @@ void AProceduralPrisma::GeneratePrisma(FVector startPoint, FVector endPoint, FVe
 			UV0s[UV0s.Num() - 2] = FVector2D(0.5f - (FMath::Cos(-NextAngle) / 2.0f), 0.5f - (FMath::Sin(-NextAngle) / 2.0f));
 			UV0s[UV0s.Num() - 3] = FVector2D(0.5f - (FMath::Cos(-Angle) / 2.0f), 0.5f - (FMath::Sin(-Angle) / 2.0f));
 
-			NormalCurrent = FVector::CrossProduct(vertices[vertices.Num() - 3] - vertices[vertices.Num() - 1], vertices[vertices.Num() - 2] - vertices[vertices.Num() - 1]).GetSafeNormal();
+			NormalCurrent = orientation.GetSafeNormal();
 			normals[normals.Num() - 3] = normals[normals.Num() - 2] = normals[normals.Num() - 1] = NormalCurrent;
 			
 		}
