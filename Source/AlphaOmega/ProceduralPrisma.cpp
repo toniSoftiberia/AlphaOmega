@@ -51,24 +51,19 @@ void AProceduralPrisma::GeneratePrisma(FVector startPoint, FVector endPoint, FVe
 		p0 = RotatePointAroundPivot(p0, endPoint, (endRotation).Rotation().Add(correction.X, correction.Y, correction.Z).Euler());
 		p1 = RotatePointAroundPivot(p1, endPoint, (endRotation).Rotation().Add(correction.X, correction.Y, correction.Z).Euler());
 		
-
-		UE_LOG(LogClass, Log, TEXT("endPoint %s"), *endPoint.ToString());
-		UE_LOG(LogClass, Log, TEXT("startPoint %s"), *startPoint.ToString());
 		if(orientation == FVector::ZeroVector)
 		if (endPoint.X == startPoint.X && endPoint.Y == startPoint.Y ) {
+			float angle = 45.f;
 			if (endPoint.Z > startPoint.Z){
-
-				float angle = FMath::RadiansToDegrees(acosf(FVector::DotProduct(startRotation, FVector::UpVector)));
+				angle = FMath::RadiansToDegrees(acosf(FVector::DotProduct(startRotation, FVector::UpVector)));
 				correction = FVector(180.f, -180.f, 0);
 				correction.X -= ((45.f - angle) * 2);
-				UE_LOG(LogClass, Log, TEXT("Enter A"));
 
 			}
 			else if (endPoint.Z < startPoint.Z ) {
 				float angle = FMath::RadiansToDegrees(acosf(FVector::DotProduct(startRotation, -FVector::UpVector)));
 				correction = FVector(0.f, 180.f, 0.f);
 				correction.X += ((45.f - angle) * 2);
-				UE_LOG(LogClass, Log, TEXT("Enter C"));
 			}	
 
 		}
