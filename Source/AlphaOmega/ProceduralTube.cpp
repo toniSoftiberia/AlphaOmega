@@ -48,7 +48,7 @@ void AProceduralTube::GenerateTube(FVector StartPoint, FVector EndPoint, int32 &
 		}
 
 		// Calculate face normal
-		FVector NormalCurrent = FVector::CrossProduct(vertices[vertices.Num()-4] - vertices[vertices.Num() - 2], vertices[vertices.Num() - 3] - vertices[vertices.Num() - 2]).GetSafeNormal();
+		FVector NormalCurrent = FVector::CrossProduct(vertices[vertices.Num()-4] - vertices[vertices.Num() - 2], vertices[vertices.Num() - 1] - vertices[vertices.Num() - 2]).GetSafeNormal();
 
 		if (smoothNormals || invertedSmoothNormals)
 		{
@@ -64,7 +64,7 @@ void AProceduralTube::GenerateTube(FVector StartPoint, FVector EndPoint, int32 &
 			
 			FVector AverageNormalRight, AverageNormalLeft;
 
-			if (!invertedSmoothNormals) {
+			if (invertedSmoothNormals) {
 				// p1 to p4 to p2
 				FVector NormalNext = FVector::CrossProduct(p1 - p2, p4 - p2).GetSafeNormal();
 				AverageNormalRight = (NormalCurrent + NormalNext) / 2;
@@ -115,7 +115,7 @@ void AProceduralTube::GenerateTube(FVector StartPoint, FVector EndPoint, int32 &
 			UV0s[UV0s.Num() - 2] = FVector2D(0.5f - (FMath::Cos(-Angle) / 2.0f), 0.5f - (FMath::Sin(-Angle) / 2.0f));
 			UV0s[UV0s.Num() - 1] = FVector2D(0.5f - (FMath::Cos(-NextAngle) / 2.0f), 0.5f - (FMath::Sin(-NextAngle) / 2.0f));
 
-			NormalCurrent = FVector::CrossProduct(vertices[vertices.Num() - 3] - vertices[vertices.Num() - 1], vertices[vertices.Num() - 2] - vertices[vertices.Num() - 1]).GetSafeNormal();
+			NormalCurrent = FVector::CrossProduct(vertices[vertices.Num() - 2] - vertices[vertices.Num() - 3], vertices[vertices.Num() - 1] - vertices[vertices.Num() - 2]).GetSafeNormal();
 			normals[normals.Num() - 3] = normals[normals.Num() - 2] = normals[normals.Num() - 1] = NormalCurrent;
 
 			// Tangents (perpendicular to the surface)
@@ -135,7 +135,7 @@ void AProceduralTube::GenerateTube(FVector StartPoint, FVector EndPoint, int32 &
 			UV0s[UV0s.Num() - 2] = FVector2D(0.5f - (FMath::Cos(-Angle) / 2.0f), 0.5f - (FMath::Sin(-Angle) / 2.0f));
 			UV0s[UV0s.Num() - 3] = FVector2D(0.5f - (FMath::Cos(-NextAngle) / 2.0f), 0.5f - (FMath::Sin(-NextAngle) / 2.0f));
 
-			NormalCurrent = FVector::CrossProduct(vertices[vertices.Num() - 3] - vertices[vertices.Num() - 1], vertices[vertices.Num() - 2] - vertices[vertices.Num() - 1]).GetSafeNormal();
+			//NormalCurrent = FVector::CrossProduct(vertices[vertices.Num() - 3] - vertices[vertices.Num() - 1], vertices[vertices.Num() - 2] - vertices[vertices.Num() - 1]).GetSafeNormal();
 			normals[normals.Num() - 3] = normals[normals.Num() - 2] = normals[normals.Num() - 1] = NormalCurrent;
 			
 		}

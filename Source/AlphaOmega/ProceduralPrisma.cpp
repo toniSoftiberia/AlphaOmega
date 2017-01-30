@@ -75,16 +75,16 @@ void AProceduralPrisma::GeneratePrisma(FVector startPoint, FVector endPoint, FVe
 		if (useUniqueTexture)
 		{
 			// UVs.  Note that Unreal UV origin (0,0) is top left
-			UV0s[UV0s.Num() - 1] = FVector2D(1.0f - (VMapPerQuad * QuadIndex), 1.0f);
-			UV0s[UV0s.Num() - 2] = FVector2D(1.0f - (VMapPerQuad * (QuadIndex + 1)), 1.0f);
-			UV0s[UV0s.Num() - 3] = FVector2D(1.0f - (VMapPerQuad * (QuadIndex + 1)), 0.0f);
-			UV0s[UV0s.Num() - 4] = FVector2D(1.0f - (VMapPerQuad * QuadIndex), 0.0f);
+			UV0s[UV0s.Num() - 2] = FVector2D((VMapPerQuad * QuadIndex), 1.0f);
+			UV0s[UV0s.Num() - 1] = FVector2D((VMapPerQuad * (QuadIndex + 1)), 1.0f);
+			UV0s[UV0s.Num() - 4] = FVector2D((VMapPerQuad * (QuadIndex + 1)), 0.0f);
+			UV0s[UV0s.Num() - 3] = FVector2D((VMapPerQuad * QuadIndex), 0.0f);
 		}
 
 		// Calculate face normal
 		//FVector NormalCurrent = FVector::CrossProduct(vertices[vertices.Num() - 4] - vertices[vertices.Num() - 2], vertices[vertices.Num() - 1] - vertices[vertices.Num() - 2]).GetSafeNormal();
-		FVector NormalCurrent = FVector::CrossProduct(vertices[vertices.Num() - 4] - vertices[vertices.Num() - 2], vertices[vertices.Num() - 1] - vertices[vertices.Num() - 2]).GetSafeNormal();
-		
+		FVector NormalCurrent = FVector::CrossProduct(p0 - p3, p1 - p3).GetSafeNormal();
+
 		if (smoothNormals || invertedSmoothNormals)
 		{
 			
@@ -99,32 +99,34 @@ void AProceduralPrisma::GeneratePrisma(FVector startPoint, FVector endPoint, FVe
 
 			FVector AverageNormalRight, AverageNormalLeft, NormalNext, NormalPrevious;
 
-			if (!invertedSmoothNormals) {
+
+			if (invertedSmoothNormals) {
 				// p1 to p4 to p2
-				NormalNext = FVector::CrossProduct(p1 - p2, p4 - p2).GetSafeNormal();
+				FVector NormalNext = FVector::CrossProduct(p1 - p2, p4 - p2).GetSafeNormal();
 				AverageNormalRight = (NormalCurrent + NormalNext) / 2;
 				AverageNormalRight = AverageNormalRight.GetSafeNormal();
 
 				// p0 to p3 to pMinus1
-				NormalPrevious = FVector::CrossProduct(p0 - pMinus1, p3 - pMinus1).GetSafeNormal();
+				FVector NormalPrevious = FVector::CrossProduct(p0 - pMinus1, p3 - pMinus1).GetSafeNormal();
 				AverageNormalLeft = (NormalCurrent + NormalPrevious) / 2;
 				AverageNormalLeft = AverageNormalLeft.GetSafeNormal();
 			}
 			else {
-				// p1 to p3 to p4
-				NormalNext = FVector::CrossProduct(p2 - p3, p4 - p3).GetSafeNormal();
+				// p3 to p4 to p1
+				FVector NormalNext = FVector::CrossProduct(p1 - p3, p4 - p2).GetSafeNormal();
 				AverageNormalRight = (NormalCurrent + NormalNext) / 2;
 				AverageNormalRight = AverageNormalRight.GetSafeNormal();
 
-				// pMinus1 to p3 to p2
-				NormalPrevious = FVector::CrossProduct(pMinus1 - p3, p2 - p3).GetSafeNormal();
+				// p2 to p0 to pMinus1
+				FVector NormalPrevious = FVector::CrossProduct(p0 - pMinus1, p2 - pMinus1).GetSafeNormal();
 				AverageNormalLeft = (NormalCurrent + NormalPrevious) / 2;
 				AverageNormalLeft = AverageNormalLeft.GetSafeNormal();
 			}
-			normals[normals.Num() - 4] = NormalNext;
+
+			normals[normals.Num() - 4] = AverageNormalRight;
 			normals[normals.Num() - 3] = NormalPrevious;
 			normals[normals.Num() - 2] = NormalPrevious;
-			normals[normals.Num() - 1] = NormalNext;
+			normals[normals.Num() - 1] = AverageNormalRight;
 
 			/*
 		FVector p0 = (FVector(FMath::Cos(NextAngle) * endRadius, FMath::Sin(NextAngle) * endRadius, 0.f)) + endPoint;
