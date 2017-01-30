@@ -45,28 +45,28 @@ void AProceduralTubeStrip::GenerateMesh() {
 	//UE_LOG(LogClass, Log, TEXT("vectorA %s"), *vectorA.ToString());
 	FVector vectorB = LinePoints[1] - LinePoints[2];
 	//UE_LOG(LogClass, Log, TEXT("vectorB %s"), *vectorB.ToString());
-	FVector RotationA = vectorA.GetSafeNormal() - vectorB.GetSafeNormal();
+	FVector RotationA = (vectorA - vectorB).GetSafeNormal();
 	//UE_LOG(LogClass, Log, TEXT("RotationA %s"), *RotationA.ToString());
 
 	vectorA = LinePoints[2] - LinePoints[1];
 	//UE_LOG(LogClass, Log, TEXT("vectorA %s"), *vectorA.ToString());
 	vectorB = LinePoints[2] - LinePoints[3];
 	//UE_LOG(LogClass, Log, TEXT("vectorB %s"), *vectorB.ToString());
-	FVector RotationB = vectorA.GetSafeNormal() - vectorB.GetSafeNormal();
+	FVector RotationB = (vectorA - vectorB).GetSafeNormal();
 	//UE_LOG(LogClass, Log, TEXT("RotationB %s"), *RotationB.ToString());
 
 	vectorA = LinePoints[3] - LinePoints[2];
 	//UE_LOG(LogClass, Log, TEXT("vectorA %s"), *vectorA.ToString());
 	vectorB = LinePoints[3] - LinePoints[0];
 	//UE_LOG(LogClass, Log, TEXT("vectorB %s"), *vectorB.ToString());
-	FVector RotationC= vectorA.GetSafeNormal() - vectorB.GetSafeNormal();
+	FVector RotationC= (vectorA - vectorB).GetSafeNormal();
 	//UE_LOG(LogClass, Log, TEXT("RotationC %s"), *RotationC.ToString());
 
 	vectorA = LinePoints[0] - LinePoints[3];
 	//UE_LOG(LogClass, Log, TEXT("vectorA %s"), *vectorA.ToString());
 	vectorB = LinePoints[0] - LinePoints[1];
 	//UE_LOG(LogClass, Log, TEXT("vectorB %s"), *vectorB.ToString());
-	FVector RotationD= vectorA.GetSafeNormal() - vectorB.GetSafeNormal();
+	FVector RotationD= (vectorA - vectorB).GetSafeNormal();
 	//UE_LOG(LogClass, Log, TEXT("RotationD %s"), *RotationD.ToString());
 
 	GeneratePrisma(LinePoints[0], LinePoints[1], RotationD, RotationA, radius2, radius2, VertexOffset, TriangleOffset, normal, tangent);
