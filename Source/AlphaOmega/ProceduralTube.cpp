@@ -48,7 +48,7 @@ void AProceduralTube::GenerateTube(FVector StartPoint, FVector EndPoint, int32 &
 		}
 
 		// Calculate face normal
-		FVector NormalCurrent = FVector::CrossProduct(vertices[vertices.Num()-4] - vertices[vertices.Num() - 2], vertices[vertices.Num() - 1] - vertices[vertices.Num() - 2]).GetSafeNormal();
+		FVector NormalCurrent = FVector::CrossProduct(p0 - p2, p3 - p2).GetSafeNormal();
 
 		if (smoothNormals || invertedSmoothNormals)
 		{

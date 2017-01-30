@@ -83,7 +83,8 @@ void AProceduralPrisma::GeneratePrisma(FVector startPoint, FVector endPoint, FVe
 
 		// Calculate face normal
 		//FVector NormalCurrent = FVector::CrossProduct(vertices[vertices.Num() - 4] - vertices[vertices.Num() - 2], vertices[vertices.Num() - 1] - vertices[vertices.Num() - 2]).GetSafeNormal();
-		FVector NormalCurrent = FVector::CrossProduct(p0 - p3, p1 - p3).GetSafeNormal();
+		//FVector NormalCurrent = FVector::CrossProduct(p0 - p3, p1 - p3).GetSafeNormal();
+		FVector NormalCurrent = FVector::CrossProduct(p1 - p3, p2 - p3).GetSafeNormal();
 
 		if (smoothNormals || invertedSmoothNormals)
 		{
@@ -163,7 +164,7 @@ void AProceduralPrisma::GeneratePrisma(FVector startPoint, FVector endPoint, FVe
 			UV0s[UV0s.Num() - 1] = FVector2D(0.5f - (FMath::Cos(-Angle) / 2.0f), 0.5f - (FMath::Sin(-Angle) / 2.0f));
 
 			//NormalCurrent = FVector::CrossProduct(vertices[vertices.Num() - 3] - vertices[vertices.Num() - 1], vertices[vertices.Num() - 2] - vertices[vertices.Num() - 1]).GetSafeNormal();
-			NormalCurrent = orientation.GetSafeNormal();
+			NormalCurrent = -orientation.GetSafeNormal();
 			normals[normals.Num() - 3] = normals[normals.Num() - 2] = normals[normals.Num() - 1] = NormalCurrent;
 			
 			// Tangents (perpendicular to the surface)
