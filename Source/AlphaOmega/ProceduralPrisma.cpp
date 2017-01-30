@@ -23,16 +23,9 @@ void AProceduralPrisma::GeneratePrisma(FVector startPoint, FVector endPoint, FVe
 
 	if (endRotation == FVector::ZeroVector || startRotation == FVector::ZeroVector) {
 		orientation = endPoint - startPoint;
-	}
-	else {
-		orientation = FVector::ZeroVector;
-	}
-
-	if (startRotation == FVector::ZeroVector)
 		startRotation = orientation;
-
-	if (endRotation == FVector::ZeroVector)
 		endRotation = orientation;
+	}
 
 	// Make a cylinder section
 	const float AngleBetweenQuads = (2.0f / (float)(circleSections)) * PI;
@@ -40,8 +33,8 @@ void AProceduralPrisma::GeneratePrisma(FVector startPoint, FVector endPoint, FVe
 	
 	FVector pInitStart = FVector(FMath::Cos(0) * startRadius, FMath::Sin(0) * startRadius, 0.f) + startPoint;
 	FVector pInitEnd = FVector(FMath::Cos(0) * endRadius, FMath::Sin(0) * endRadius, 0.f) + endPoint;
-	pInitStart = RotatePointAroundPivot(pInitStart, startPoint, (startRotation + orientation).Rotation().Add(90.f, 0.f, 0.f).Euler());
-	pInitEnd = RotatePointAroundPivot(pInitEnd, endPoint, (endRotation + orientation).Rotation().Add(90.f, 0.f, 0.f).Euler());
+	pInitStart = RotatePointAroundPivot(pInitStart, startPoint, (startRotation).Rotation().Add(90.f, 0.f, 0.f).Euler());
+	pInitEnd = RotatePointAroundPivot(pInitEnd, endPoint, (endRotation).Rotation().Add(90.f, 0.f, 0.f).Euler());
 
 	for (int32 QuadIndex = 0; QuadIndex < circleSections; QuadIndex++)
 	{
@@ -55,19 +48,34 @@ void AProceduralPrisma::GeneratePrisma(FVector startPoint, FVector endPoint, FVe
 		FVector p3 = (FVector(FMath::Cos(Angle) * startRadius, FMath::Sin(Angle) * startRadius, 0.f)) + startPoint;
 
 		FVector correction = FVector(90.f, 0.f, 0.f);
-		p0 = RotatePointAroundPivot(p0, endPoint, (endRotation + orientation).Rotation().Add(correction.X, correction.Y, correction.Z).Euler());
-		p1 = RotatePointAroundPivot(p1, endPoint, (endRotation + orientation).Rotation().Add(correction.X, correction.Y, correction.Z).Euler());
+		p0 = RotatePointAroundPivot(p0, endPoint, (endRotation).Rotation().Add(correction.X, correction.Y, correction.Z).Euler());
+		p1 = RotatePointAroundPivot(p1, endPoint, (endRotation).Rotation().Add(correction.X, correction.Y, correction.Z).Euler());
+		
 
-		if (endPoint.Z > startPoint.Z && endPoint.Y == startPoint.Y) {
-			UE_LOG(LogClass, Log, TEXT("startRotation %s"), *startRotation.ToString());
+		UE_LOG(LogClass, Log, TEXT("endPoint %s"), *endPoint.ToString());
+		UE_LOG(LogClass, Log, TEXT("startPoint %s"), *startPoint.ToString());
+		if(orientation == FVector::ZeroVector)
+		if (endPoint.X == startPoint.X && endPoint.Y == startPoint.Y ) {
+			if (endPoint.Z > startPoint.Z){
 
-			correction = FVector(180.f, -180.f, 0);
+				float angle = FMath::RadiansToDegrees(acosf(FVector::DotProduct(startRotation, FVector::UpVector)));
+				correction = FVector(180.f, -180.f, 0);
+				correction.X -= ((45.f - angle) * 2);
+				UE_LOG(LogClass, Log, TEXT("Enter A"));
+
+			}
+			else if (endPoint.Z < startPoint.Z ) {
+				float angle = FMath::RadiansToDegrees(acosf(FVector::DotProduct(startRotation, -FVector::UpVector)));
+				correction = FVector(0.f, 180.f, 0.f);
+				correction.X += ((45.f - angle) * 2);
+				UE_LOG(LogClass, Log, TEXT("Enter C"));
+			}	
+
 		}
-		else if (endPoint.Z < startPoint.Z ) {
-			correction = FVector(0.f, 180.f, 0.f);			
-		}		
-		p2 = RotatePointAroundPivot(p2, startPoint, (startRotation + orientation).Rotation().Add(correction.X, correction.Y, correction.Z).Euler());
-		p3 = RotatePointAroundPivot(p3, startPoint, (startRotation + orientation).Rotation().Add(correction.X, correction.Y, correction.Z).Euler());
+
+
+		p2 = RotatePointAroundPivot(p2, startPoint, (startRotation).Rotation().Add(correction.X, correction.Y, correction.Z).Euler());
+		p3 = RotatePointAroundPivot(p3, startPoint, (startRotation).Rotation().Add(correction.X, correction.Y, correction.Z).Euler());
 
 		BuildQuad(p0, p1, p3, p2, VertexOffset, TriangleOffset, normal, tangent);
 
@@ -122,7 +130,7 @@ void AProceduralPrisma::GeneratePrisma(FVector startPoint, FVector endPoint, FVe
 			UV0s[UV0s.Num() - 1] = FVector2D(0.5f - (FMath::Cos(-Angle) / 2.0f), 0.5f - (FMath::Sin(-Angle) / 2.0f));
 
 			//NormalCurrent = FVector::CrossProduct(vertices[vertices.Num() - 3] - vertices[vertices.Num() - 1], vertices[vertices.Num() - 2] - vertices[vertices.Num() - 1]).GetSafeNormal();
-			NormalCurrent = -orientation.GetSafeNormal();
+			NormalCurrent = -startRotation.GetSafeNormal();
 			normals[normals.Num() - 3] = normals[normals.Num() - 2] = normals[normals.Num() - 1] = NormalCurrent;
 			
 			// Tangents (perpendicular to the surface)
@@ -142,7 +150,7 @@ void AProceduralPrisma::GeneratePrisma(FVector startPoint, FVector endPoint, FVe
 			UV0s[UV0s.Num() - 2] = FVector2D(0.5f - (FMath::Cos(-NextAngle) / 2.0f), 0.5f - (FMath::Sin(-NextAngle) / 2.0f));
 			UV0s[UV0s.Num() - 3] = FVector2D(0.5f - (FMath::Cos(-Angle) / 2.0f), 0.5f - (FMath::Sin(-Angle) / 2.0f));
 
-			NormalCurrent = orientation.GetSafeNormal();
+			NormalCurrent = endRotation.GetSafeNormal();
 			normals[normals.Num() - 3] = normals[normals.Num() - 2] = normals[normals.Num() - 1] = NormalCurrent;
 			
 		}
