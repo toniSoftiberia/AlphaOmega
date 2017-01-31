@@ -50,23 +50,29 @@ void AProceduralPrisma::GeneratePrisma(FVector startPoint, FVector endPoint, FVe
 		FVector correction = FVector(90.f, 0.f, 0.f);
 		p0 = RotatePointAroundPivot(p0, endPoint, (endRotation).Rotation().Add(correction.X, correction.Y, correction.Z).Euler());
 		p1 = RotatePointAroundPivot(p1, endPoint, (endRotation).Rotation().Add(correction.X, correction.Y, correction.Z).Euler());
-		
-		if(orientation == FVector::ZeroVector)
-		if (endPoint.X == startPoint.X && endPoint.Y == startPoint.Y ) {
-			float angle = 45.f;
-			if (endPoint.Z > startPoint.Z){
-				angle = FMath::RadiansToDegrees(acosf(FVector::DotProduct(startRotation, FVector::UpVector)));
-				correction = FVector(180.f, -180.f, 0);
-				correction.X -= ((45.f - angle) * 2);
+
+		orientation = endPoint - startPoint;
+		orientation.Normalize();
+		UE_LOG(LogClass, Log, TEXT("orientation %s"), *orientation.ToString());
+		//if(orientation == FVector::ZeroVector)
+
+			if (FMath::Abs(orientation.Z) > FMath::Abs(orientation.Y) && FMath::Abs(orientation.Z) > FMath::Abs(orientation.X)) {
+				float angle = 45.f;
+				if (endPoint.Z > startPoint.Z) {
+					angle = FMath::RadiansToDegrees(acosf(FVector::DotProduct(startRotation, FVector::UpVector)));
+					correction = FVector(180.f, -180.f, 0);
+					correction.X -= ((45.f - angle) * 2);
+					UE_LOG(LogClass, Log, TEXT("correction >"));
+
+				}
+				else if (endPoint.Z < startPoint.Z) {
+					float angle = FMath::RadiansToDegrees(acosf(FVector::DotProduct(startRotation, -FVector::UpVector)));
+					correction = FVector(0.f, 180.f, 0.f);
+					correction.X += ((45.f - angle) * 2);
+					UE_LOG(LogClass, Log, TEXT("correction <"));
+				}
 
 			}
-			else if (endPoint.Z < startPoint.Z ) {
-				float angle = FMath::RadiansToDegrees(acosf(FVector::DotProduct(startRotation, -FVector::UpVector)));
-				correction = FVector(0.f, 180.f, 0.f);
-				correction.X += ((45.f - angle) * 2);
-			}	
-
-		}
 
 
 		p2 = RotatePointAroundPivot(p2, startPoint, (startRotation).Rotation().Add(correction.X, correction.Y, correction.Z).Euler());

@@ -14,7 +14,6 @@ void AProceduralTubeStrip::GenerateMesh() {
 
 	float radius = 10.0f;
 
-	float angle;
 	FVector vectorA = LinePoints[1] - LinePoints[0];
 	FVector vectorB = LinePoints[1] - LinePoints[2];
 	FVector RotationA = (vectorA.GetSafeNormal() - vectorB.GetSafeNormal()).GetSafeNormal();
