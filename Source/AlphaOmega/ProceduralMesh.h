@@ -69,6 +69,9 @@ public:
 	void GenerateSphere(FVector center, float radius, int32 circleSections, int32 heightSections, bool smoothNormals, bool useUniqueTexture, 
 		int32 &VertexOffset, int32 &TriangleOffset, FProcMeshTangent tangent);
 
+	void GenerateTube(FVector startPoint, FVector endPoint, FVector startRotation, FVector endRotation, float startRadius, float endRadius, int32 circleSections, bool smoothNormals, bool useUniqueTexture, bool addCaps,
+		int32 &VertexOffset, int32 &TriangleOffset, FProcMeshTangent tangent);
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
 		UMaterialInterface* material;
 };

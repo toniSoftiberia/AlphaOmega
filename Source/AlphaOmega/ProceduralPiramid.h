@@ -33,8 +33,6 @@ public:
 		bool useUniqueTexture;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
-		bool addBottomCap;
-	
-	
+		bool addBottomCap;	
 	
 };

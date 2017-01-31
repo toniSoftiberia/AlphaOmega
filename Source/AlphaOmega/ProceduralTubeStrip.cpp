@@ -2,17 +2,13 @@
 
 #include "AlphaOmega.h"
 #include "ProceduralTubeStrip.h"
-#include "ProceduralPrisma.h"
 
 void AProceduralTubeStrip::GenerateMesh() {
 
 	// Now we create 6x faces, 4 vertices each
 	int32 VertexOffset = 0;
 	int32 TriangleOffset = 0;
-	FVector normal = FVector();
 	FProcMeshTangent tangent = FProcMeshTangent(1,1,1);
-
-	float radius = 10.0f;
 
 	FVector vectorA = LinePoints[1] - LinePoints[0];
 	FVector vectorB = LinePoints[1] - LinePoints[2];
@@ -30,10 +26,9 @@ void AProceduralTubeStrip::GenerateMesh() {
 	vectorB = LinePoints[0] - LinePoints[1];
 	FVector RotationD = (vectorA.GetSafeNormal() - vectorB.GetSafeNormal()).GetSafeNormal();
 
-	GeneratePrisma(LinePoints[0], LinePoints[1], RotationD, RotationA, radius, radius, VertexOffset, TriangleOffset, normal, tangent);
-	GeneratePrisma(LinePoints[1], LinePoints[2], RotationA, RotationB, radius, radius, VertexOffset, TriangleOffset, normal, tangent);
-	GeneratePrisma(LinePoints[2], LinePoints[3], RotationB, RotationC, radius, radius, VertexOffset, TriangleOffset, normal, tangent);
-	GeneratePrisma(LinePoints[3], LinePoints[0], RotationC, RotationD, radius, radius, VertexOffset, TriangleOffset, normal, tangent);
-
+	GenerateTube(LinePoints[0], LinePoints[1], RotationD, RotationA, startRadius, startRadius, circleSections, smoothNormals, useUniqueTexture, addCaps, VertexOffset, TriangleOffset, tangent);
+	GenerateTube(LinePoints[1], LinePoints[2], RotationA, RotationB, startRadius, startRadius, circleSections, smoothNormals, useUniqueTexture, addCaps, VertexOffset, TriangleOffset, tangent);
+	GenerateTube(LinePoints[2], LinePoints[3], RotationB, RotationC, startRadius, startRadius, circleSections, smoothNormals, useUniqueTexture, addCaps, VertexOffset, TriangleOffset, tangent);
+	GenerateTube(LinePoints[3], LinePoints[0], RotationC, RotationD, startRadius, startRadius, circleSections, smoothNormals, useUniqueTexture, addCaps, VertexOffset, TriangleOffset, tangent);
 }
 

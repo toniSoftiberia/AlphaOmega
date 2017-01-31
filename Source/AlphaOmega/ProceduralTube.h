@@ -17,14 +17,33 @@ class ALPHAOMEGA_API AProceduralTube : public AProceduralMesh
 
 public:
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
-		float height;
+	// Prima attributes
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
-		float radius;
+		FVector startPoint;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
+		FVector endPoint;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
+		FVector startRotation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
+		FVector endRotation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
+		float startRadius;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
+		float endRadius;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
 		int32 circleSections;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
+		bool addCaps;
+
+	// Common attributes
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
 		bool smoothNormals;
@@ -34,10 +53,5 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
 		bool useUniqueTexture;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
-		bool addCaps;
-
-	virtual void GenerateTube(FVector StartPoint, FVector EndPoint, int32 &VertexOffset, int32 &TriangleOffset, FVector normal, FProcMeshTangent tangent);
 	
 };

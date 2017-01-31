@@ -2,14 +2,14 @@
 
 #pragma once
 
-#include "ProceduralPrisma.h"
+#include "ProceduralMesh.h"
 #include "ProceduralTubeStrip.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class ALPHAOMEGA_API AProceduralTubeStrip : public AProceduralPrisma
+class ALPHAOMEGA_API AProceduralTubeStrip : public AProceduralMesh
 {
 	GENERATED_BODY()
 
@@ -17,28 +17,35 @@ class ALPHAOMEGA_API AProceduralTubeStrip : public AProceduralPrisma
 
 public:
 
+	// Prisma attributes
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
 		TArray<FVector> LinePoints;
 
-	//virtual void GenerateTubeStrip(FVector StartPoint, FVector EndPoint, int32 &VertexOffset, int32 &TriangleOffset, FVector normal, FProcMeshTangent tangent);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
+		FVector startRotation;
 
-	/*
-	void GenerateMesh();
-	void GenerateCylinder(TArray<FRuntimeMeshVertexSimple>& Vertices, TArray<int32>& Triangles, FVector StartPoint, FVector EndPoint, float InWidth, int32 InCrossSectionCount, int32& VertexIndex, int32& TriangleIndex, bool bInSmoothNormals = true);
-	FBox GetBounds();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
+		FVector endRotation;
 
-	FVector RotatePointAroundPivot(FVector InPoint, FVector InPivot, FVector InAngles);
-	void PreCacheCrossSection();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
+		float startRadius;
 
-	int32 LastCachedCrossSectionCount;
-	UPROPERTY(Transient)
-		TArray<FVector> CachedCrossSectionPoints;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
+		float endRadius;
 
-	// Mesh buffers
-	void SetupMeshBuffers();
-	bool bHaveBuffersBeenInitialized = false;
-	TArray<FRuntimeMeshVertexSimple> Vertices;
-	TArray<int32> Triangles;
-	*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
+		int32 circleSections;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
+		bool addCaps;
+
+	// Common attributes
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
+		bool smoothNormals;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
+		bool useUniqueTexture;
 	
 };
