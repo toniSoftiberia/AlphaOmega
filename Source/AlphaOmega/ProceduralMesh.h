@@ -49,6 +49,9 @@ protected:
 
 public:
 
+
+	virtual void GenerateMesh();
+
 	void BuildTriangle(
 		FVector vertexA, FVector vertexB, FVector vertexC,
 		int32& VertexOffset,
@@ -62,8 +65,6 @@ public:
 		int32& TriangleOffset,
 		FVector& Normal,
 		FProcMeshTangent& Tangent);
-
-	virtual void GenerateMesh();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
 		UMaterialInterface* material;

@@ -46,14 +46,44 @@ void AProceduralSphere::GenerateSphere(FVector center, float radius, int32 &Vert
 			FVector p2 = RotatePointAroundPivot(pInitStart, center, FVector(.0f, nextAngleLatitude, nextAngleAltitude));
 			FVector p3 = RotatePointAroundPivot(pInitStart, center, FVector(.0f, nextAngleLatitude, angleAltitude));
 
-			BuildQuad(p3, p2, p1, p0, VertexOffset, TriangleOffset, normal, tangent);
+			FVector currentNormal = (((p3 + p2 + p1 + p0) / 4) - center).GetSafeNormal();
+			BuildQuad(p3, p2, p1, p0, VertexOffset, TriangleOffset, currentNormal, tangent);
+
+			if (smoothNormals)
+			{
+
+				// To smooth normals we give the vertices different values than the polygon they belong to.
+				// GPUs know how to interpolate between those.
+				// I do this here as an average between normals of two adjacent polygons
+				normals[normals.Num() - 4] = (p3 - center).GetSafeNormal();
+				normals[normals.Num() - 3] = (p2 - center).GetSafeNormal();
+				normals[normals.Num() - 2] = (p1 - center).GetSafeNormal();
+				normals[normals.Num() - 1] = (p0 - center).GetSafeNormal();
+
+
+			}
 
 			p0 = RotatePointAroundPivot(pInitStart, center, FVector(.0f, -angleLatitude, nextAngleAltitude));
 			p1 = RotatePointAroundPivot(pInitStart, center, FVector(.0f, -angleLatitude, angleAltitude));
 			p2 = RotatePointAroundPivot(pInitStart, center, FVector(.0f, -nextAngleLatitude, angleAltitude));
 			p3 = RotatePointAroundPivot(pInitStart, center, FVector(.0f, -nextAngleLatitude, nextAngleAltitude));
 
-			BuildQuad(p3, p2, p1, p0, VertexOffset, TriangleOffset, normal, tangent);
+			currentNormal = (((p3 + p2 + p1 + p0) / 4) - center).GetSafeNormal();
+			BuildQuad(p3, p2, p1, p0, VertexOffset, TriangleOffset, currentNormal, tangent);
+
+			if (smoothNormals)
+			{
+				
+				// To smooth normals we give the vertices different values than the polygon they belong to.
+				// GPUs know how to interpolate between those.
+				// I do this here as an average between normals of two adjacent polygons
+				normals[normals.Num() - 4] = (p3 - center).GetSafeNormal();
+				normals[normals.Num() - 3] = (p2 - center).GetSafeNormal();
+				normals[normals.Num() - 2] = (p1 - center).GetSafeNormal();
+				normals[normals.Num() - 1] = (p0 - center).GetSafeNormal();
+				
+
+			}
 
 			if (useUniqueTexture)
 			{
@@ -67,6 +97,10 @@ void AProceduralSphere::GenerateSphere(FVector center, float radius, int32 &Vert
 				UV0s[UV0s.Num() - 7] = FVector2D(1.0f - (VMapPerAltitude * (i + 1)), 0.5f - (VMapPerLatitude * (j + 1)));
 				UV0s[UV0s.Num() - 8] = FVector2D(1.0f - (VMapPerAltitude * i), 0.5f - (VMapPerLatitude * (j + 1)));
 			}
+
+
+
+
 		}
 	}
 }

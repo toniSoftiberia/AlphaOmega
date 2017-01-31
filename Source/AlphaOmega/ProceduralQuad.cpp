@@ -11,7 +11,7 @@ void AProceduralQuad::GenerateMesh() {
 
 	int32 triangleOffset = 0;
 
-	FVector normal = FVector::ZeroVector;
+	FVector normal = FVector::CrossProduct(topRight - topLeft, bottomLeft - topLeft).GetSafeNormal();
 
 	FProcMeshTangent tangent = FProcMeshTangent(1, 1, 1);
 

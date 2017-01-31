@@ -31,7 +31,10 @@ void AProceduralPiramid::GenerateMesh() {
 		FVector p0 = (FVector(FMath::Cos(Angle) * radius, FMath::Sin(Angle) * radius, 0.f));
 		FVector p1 = (FVector(FMath::Cos(NextAngle) * radius, FMath::Sin(NextAngle) * radius, 0.f));
 
-		BuildTriangle( p1, p0, Offset, VertexOffset, TriangleOffset, normal, tangent);
+		// Calculate face normal
+		FVector NormalCurrent = FVector::CrossProduct(p0 - Offset, p1 - Offset).GetSafeNormal();
+
+		BuildTriangle( p1, p0, Offset, VertexOffset, TriangleOffset, NormalCurrent, tangent);
 
 		if (useUniqueTexture)
 		{
@@ -41,54 +44,19 @@ void AProceduralPiramid::GenerateMesh() {
 			UV0s[UV0s.Num() - 2] = FVector2D(1.0f - (VMapPerQuad * QuadIndex), 0.0f);
 		}
 
-		// Calculate face normal
-		FVector NormalCurrent = FVector::CrossProduct(p0 - Offset, p1 - Offset).GetSafeNormal();
-		
-		if (smoothNormals || invertedSmoothNormals)
+
+		if (smoothNormals)
 		{
 
 			// To smooth normals we give the vertices different values than the polygon they belong to.
 			// GPUs know how to interpolate between those.
 			// I do this here as an average between normals of two adjacent polygons
-			float NextNextAngle = (float)(QuadIndex + 2) * AngleBetweenQuads;
-			FVector p4 = FVector(FMath::Cos(NextNextAngle) * radius, FMath::Sin(NextNextAngle) * radius, 0.f);
+			normals[normals.Num() - 3] = (p1).GetSafeNormal();
+			normals[normals.Num() - 2] = (p0).GetSafeNormal();
+			//normals[normals.Num() - 1] = ((p0 - p1) - Offset).GetSafeNormal();
+			normals[normals.Num() - 1] = FVector::UpVector;
 
-			float PreviousAngle = (float)(QuadIndex - 1) * AngleBetweenQuads;
-			FVector pMinus1 = FVector(FMath::Cos(PreviousAngle) * radius, FMath::Sin(PreviousAngle) * radius, 0.f);
 
-			FVector AverageNormalRight, AverageNormalLeft;
-			
-			if (!invertedSmoothNormals) {
-				// p3 to p4 to p1
-				FVector NormalNext = FVector::CrossProduct(Offset - p1, p4 - p1).GetSafeNormal();
-				AverageNormalRight = (NormalCurrent + NormalNext) / 2;
-				AverageNormalRight = AverageNormalRight.GetSafeNormal();
-
-				// p2 to p0 to pMinus1
-				FVector NormalPrevious = FVector::CrossProduct(Offset - pMinus1, p0 - pMinus1).GetSafeNormal();
-				AverageNormalLeft = (NormalCurrent + NormalPrevious) / 2;
-				AverageNormalLeft = AverageNormalLeft.GetSafeNormal();
-			}
-			else {
-				// p1 to p4 to p2
-				FVector NormalNext = (p0 - p4).GetSafeNormal();
-				AverageNormalRight = (NormalCurrent + NormalNext) / 2;
-				AverageNormalRight = AverageNormalRight.GetSafeNormal();
-
-				// p0 to p3 to pMinus1
-				FVector NormalPrevious = (p0 - pMinus1).GetSafeNormal();
-				AverageNormalLeft = (NormalCurrent + NormalPrevious) / 2;
-				AverageNormalLeft = AverageNormalLeft.GetSafeNormal();
-			}
-
-			normals[normals.Num() - 3] = AverageNormalRight;
-			normals[normals.Num() - 2] = AverageNormalRight;
-			normals[normals.Num() - 1] = AverageNormalLeft;
-		}
-		else
-		{
-			// If not smoothing we just set the vertex normal to the same normal as the polygon they belong to
-			normals[normals.Num() - 3] = normals[normals.Num() - 2] = normals[normals.Num() - 1] = NormalCurrent;
 		}
 
 		// -------------------------------------------------------

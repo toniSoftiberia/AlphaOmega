@@ -98,10 +98,10 @@ void AProceduralPrisma::GeneratePrisma(FVector startPoint, FVector endPoint, FVe
 			// To smooth normals we give the vertices different values than the polygon they belong to.
 			// GPUs know how to interpolate between those.
 			// I do this here as an average between normals of two adjacent polygons
-			normals[normals.Num() - 4] = (p0 - endPoint).GetSafeNormal();;
-			normals[normals.Num() - 3] = (p1 - endPoint).GetSafeNormal();;
-			normals[normals.Num() - 2] = (p3 - startPoint).GetSafeNormal();;
-			normals[normals.Num() - 1] = (p2 - startPoint).GetSafeNormal();;
+			normals[normals.Num() - 4] = (p0 - endPoint).GetSafeNormal();
+			normals[normals.Num() - 3] = (p1 - endPoint).GetSafeNormal();
+			normals[normals.Num() - 2] = (p3 - startPoint).GetSafeNormal();
+			normals[normals.Num() - 1] = (p2 - startPoint).GetSafeNormal();
 
 
 		}
