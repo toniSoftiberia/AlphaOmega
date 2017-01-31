@@ -146,6 +146,48 @@ void AProceduralMesh::BuildQuad(
 	tangents.Add(Tangent);
 }
 
+void AProceduralMesh::BuildCube(FVector cubeSize, int32& VertexOffset, int32& TriangleOffset, FProcMeshTangent& tangent){
+
+	// Calculate a half offset so we get correct center of object
+	float OffsetX = cubeSize.X / 2.0f;
+	float OffsetY = cubeSize.Y / 2.0f;
+	float OffsetZ = cubeSize.Z / 2.0f;
+
+	// Define the 8 corners of the cube
+	FVector p0 = FVector(OffsetX, OffsetY, -OffsetZ);
+	FVector p1 = FVector(OffsetX, -OffsetY, -OffsetZ);
+	FVector p2 = FVector(OffsetX, -OffsetY, OffsetZ);
+	FVector p3 = FVector(OffsetX, OffsetY, OffsetZ);
+	FVector p4 = FVector(-OffsetX, OffsetY, -OffsetZ);
+	FVector p5 = FVector(-OffsetX, -OffsetY, -OffsetZ);
+	FVector p6 = FVector(-OffsetX, -OffsetY, OffsetZ);
+	FVector p7 = FVector(-OffsetX, OffsetY, OffsetZ);
+
+	// Front (+X) face: 0-1-2-3
+	FVector normal = FVector::ForwardVector;
+	BuildQuad(p0, p1, p2, p3, VertexOffset, TriangleOffset, normal, tangent);
+
+	// Back (-X) face: 5-4-7-6
+	normal = -FVector::ForwardVector;
+	BuildQuad(p5, p4, p7, p6, VertexOffset, TriangleOffset, normal, tangent);
+
+	// Left (-Y) face: 1-5-6-2
+	normal = -FVector::RightVector;
+	BuildQuad(p1, p5, p6, p2, VertexOffset, TriangleOffset, normal, tangent);
+
+	// Right (+Y) face: 4-0-3-7
+	normal = FVector::RightVector;
+	BuildQuad(p4, p0, p3, p7, VertexOffset, TriangleOffset, normal, tangent);
+
+	// Top (+Z) face: 6-7-3-2
+	normal = FVector::UpVector;
+	BuildQuad(p6, p7, p3, p2, VertexOffset, TriangleOffset, normal, tangent);
+
+	// Bottom (-Z) face: 1-0-4-5
+	normal = -FVector::UpVector;
+	BuildQuad(p1, p0, p4, p5, VertexOffset, TriangleOffset, normal, tangent);
+}
+
 FVector AProceduralMesh::RotatePointAroundPivot(FVector InPoint, FVector InPivot, FVector InAngles)
 {
 	FVector direction = InPoint - InPivot; // get point direction relative to pivot

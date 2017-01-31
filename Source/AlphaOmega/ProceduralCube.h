@@ -18,8 +18,6 @@ class ALPHAOMEGA_API AProceduralCube : public AProceduralMesh
 public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
-	FVector cubeSize;
-	
-	
+	FVector cubeSize;	
 	
 };

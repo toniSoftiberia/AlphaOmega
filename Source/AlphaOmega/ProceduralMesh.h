@@ -64,6 +64,12 @@ public:
 		int32& VertexOffset,
 		int32& TriangleOffset,
 		FVector& Normal,
+		FProcMeshTangent& tangent);
+
+	void BuildCube(
+		FVector cubeSize,
+		int32& VertexOffset,
+		int32& TriangleOffset,
 		FProcMeshTangent& Tangent);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
