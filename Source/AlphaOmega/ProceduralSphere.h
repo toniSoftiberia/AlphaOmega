@@ -42,7 +42,4 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
 		bool useUniqueTexture;
 
-
-	virtual void GenerateSphere(FVector center, float radius, int32 &VertexOffset, int32 &TriangleOffset, FVector normal, FProcMeshTangent tangent);
-
 };
