@@ -49,28 +49,27 @@ protected:
 
 public:
 
-
 	virtual void GenerateMesh();
 
-	FVector RotatePointAroundPivot(FVector InPoint, FVector InPivot, FVector InAngles);
+	FVector RotatePointAroundPivot(FVector inPoint, FVector inPivot, FVector inAngles);
 
 	void BuildTriangle(	FVector vertexA, FVector vertexB, FVector vertexC,
-		int32& VertexOffset, int32& TriangleOffset, FVector& normal, FProcMeshTangent& tangent);
+		int32& vertexOffset, int32& triangleOffset, FVector& normal, FProcMeshTangent& tangent);
 
 	void BuildQuad(	FVector bottomLeft, FVector bottomRight, FVector topRight, FVector topLeft,
-		int32& VertexOffset, int32& TriangleOffset, FVector& Normal, FProcMeshTangent& tangent);
+		int32& vertexOffset, int32& triangleOffset, FVector& normal, FProcMeshTangent& tangent);
 
 	void BuildCube(	FVector cubeSize,
-		int32& VertexOffset, int32& TriangleOffset, FProcMeshTangent& Tangent);
+		int32& vertexOffset, int32& triangleOffset, FProcMeshTangent& tangent);
 
 	void BuildPiramid( float height, float radius, int32 circleSections, bool smoothNormals, bool useUniqueTexture, bool addBottomCap,
-		int32& VertexOffset, int32& TriangleOffset, FProcMeshTangent& Tangent);
+		int32& vertexOffset, int32& triangleOffset, FProcMeshTangent& tangent);
 
-	void GenerateSphere(FVector center, float radius, int32 circleSections, int32 heightSections, bool smoothNormals, bool useUniqueTexture, 
-		int32 &VertexOffset, int32 &TriangleOffset, FProcMeshTangent tangent);
+	void BuildSphere(FVector center, float radius, int32 circleSections, int32 heightSections, bool smoothNormals, bool useUniqueTexture,
+		int32& vertexOffset, int32& triangleOffset, FProcMeshTangent& tangent);
 
-	void GenerateTube(FVector startPoint, FVector endPoint, FVector startRotation, FVector endRotation, float startRadius, float endRadius, int32 circleSections, bool smoothNormals, bool useUniqueTexture, bool addCaps,
-		int32 &VertexOffset, int32 &TriangleOffset, FProcMeshTangent tangent);
+	void BuildTube(FVector startPoint, FVector endPoint, FVector startRotation, FVector endRotation, float startRadius, float endRadius, int32 circleSections, bool smoothNormals, bool useUniqueTexture, bool addCaps,
+		int32& vertexOffset, int32& triangleOffset, FProcMeshTangent& tangent);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
 		UMaterialInterface* material;

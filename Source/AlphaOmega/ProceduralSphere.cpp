@@ -9,12 +9,12 @@
 void AProceduralSphere::GenerateMesh() {
 
 	// Now we create 6x faces, 4 vertices each
-	int32 VertexOffset = 0;
-	int32 TriangleOffset = 0;
+	int32 vertexOffset = 0;
+	int32 triangleOffset = 0;
 	FVector normal = FVector();
 	FProcMeshTangent tangent = FProcMeshTangent(0, 0, 0);
 
-	GenerateSphere(center, radius, circleSections, heightSections, smoothNormals, useUniqueTexture, VertexOffset, TriangleOffset, tangent);
+	BuildSphere(center, radius, circleSections, heightSections, smoothNormals, useUniqueTexture, vertexOffset, triangleOffset, tangent);
 }
 
 

@@ -7,10 +7,10 @@
 
 void AProceduralCube::GenerateMesh() {
 
-	int32 VertexOffset = 0;
-	int32 TriangleOffset = 0;
+	int32 vertexOffset = 0;
+	int32 triangleOffset = 0;
 	FProcMeshTangent tangent = FProcMeshTangent(1, 1, 1);
 
-	BuildCube(cubeSize, VertexOffset, TriangleOffset, tangent);
+	BuildCube(cubeSize, vertexOffset, triangleOffset, tangent);
 }
 
