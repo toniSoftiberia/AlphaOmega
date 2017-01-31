@@ -72,6 +72,17 @@ public:
 		int32& TriangleOffset,
 		FProcMeshTangent& Tangent);
 
+	void BuildPiramid(
+		float height,
+		float radius,
+		int32 circleSections,
+		bool smoothNormals,
+		bool useUniqueTexture,
+		bool addBottomCap,
+		int32& VertexOffset,
+		int32& TriangleOffset,
+		FProcMeshTangent& Tangent);
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
 		UMaterialInterface* material;
 

@@ -30,13 +30,10 @@ public:
 		bool smoothNormals;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
-		bool invertedSmoothNormals;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
 		bool useUniqueTexture;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
-		bool addCaps;
+		bool addBottomCap;
 	
 	
 	
