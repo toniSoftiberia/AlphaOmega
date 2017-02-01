@@ -34,31 +34,31 @@ protected:
 #endif
 
 	/** Array of FVectors to store the location of the vertices*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Procedural Parameters")
+	UPROPERTY()
 		TArray<FVector> vertices;
 
 	/** Array of FVectors2D to store the UV0 values, must have the same length as vertices*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Procedural Parameters")
+	UPROPERTY()
 		TArray<FVector2D> UV0s;
 
 	/** Array of FVectors to store the normal of each vertex, must have the same length as vertices*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Procedural Parameters")
+	UPROPERTY()
 		TArray<FVector> normals;
 
 	/** Array of FProcMeshTangent to store the tangent of each vertex, must have the same length as vertices*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Procedural Parameters")
+	UPROPERTY()
 		TArray<FProcMeshTangent> tangents;
 
 	/** Array to indicate what vertices define each triangle, every 3 vertices are a triangle*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Procedural Parameters")
+	UPROPERTY()
 		TArray<int32> triangles;
 
 	/** Used to know what will be the next triangle*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Procedural Parameters")
+	UPROPERTY()
 		int32 vertexOffset;
 
 	/** The mesh component to generate the mesh*/
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Procedural Parameters")
+	UPROPERTY()
 		UProceduralMeshComponent* mesh;
 
 
