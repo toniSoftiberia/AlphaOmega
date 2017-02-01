@@ -5,10 +5,10 @@
 
 
 
+// We only need to call the method to build a sphere with the desired parameters
 void AProceduralTube::GenerateMesh() {
 
-	FProcMeshTangent tangent = FProcMeshTangent(0, 0, 0);
-
+	// Here we need to look for orientation of the tube
 	FVector orientation = startPoint - endRotation;
 
 	BuildTube(startPoint, endPoint, startRotation, endRotation, startRadius, endRadius, circleSections, smoothNormals, useUniqueTexture, addCaps);

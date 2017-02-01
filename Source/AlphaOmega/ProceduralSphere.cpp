@@ -4,13 +4,10 @@
 #include "ProceduralSphere.h"
 
 
-
-
+/** Sets up the values to generate the desired figure*/
 void AProceduralSphere::GenerateMesh() {
 
-	// Now we create 6x faces, 4 vertices each
-	FProcMeshTangent tangent = FProcMeshTangent(0, 0, 0);
-
+	// We only need to call the method to build a sphere with the desired parameters
 	BuildSphere(center, radius, circleSections, heightSections, smoothNormals, useUniqueTexture);
 }
 
