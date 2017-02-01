@@ -3,13 +3,11 @@
 #include "AlphaOmega.h"
 #include "ProceduralPiramid.h"
 
+/** Sets up the values to generate the desired figure*/
 void AProceduralPiramid::GenerateMesh() {
 
-
-	// Now we create 6x faces, 4 vertices each
-	FProcMeshTangent tangent = FProcMeshTangent(1, 1, 1);
-
-	BuildPiramid(height,  radius, circleSections, smoothNormals, useUniqueTexture, addBottomCap, tangent);
+	// We only need to call the method to build a piramid with the desired parameters
+	BuildPiramid(height,  radius, circleSections, smoothNormals, useUniqueTexture, addBottomCap);
 }
 
 

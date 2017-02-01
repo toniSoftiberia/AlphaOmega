@@ -68,28 +68,22 @@ public:
 	virtual void GenerateMesh();
 
 	/** Generates a triangle from input vertices*/
-	void BuildTriangle(	FVector vertexA, FVector vertexB, FVector vertexC,
-		FVector& normal, FProcMeshTangent& tangent);
+	void BuildTriangle(	FVector vertexA, FVector vertexB, FVector vertexC);
 
 	/** Generates a quad from input vertices*/
-	void BuildQuad(	FVector bottomLeft, FVector bottomRight, FVector topRight, FVector topLeft,
-		FVector& normal, FProcMeshTangent& tangent);
+	void BuildQuad(	FVector bottomLeft, FVector bottomRight, FVector topRight, FVector topLeft);
 
 	/** Generates a cube of cubesize size*/
-	void BuildCube(	FVector cubeSize,
-		FProcMeshTangent& tangent);
+	void BuildCube(	FVector cubeSize);
 
 	/** Generates a piramid from input values*/
-	void BuildPiramid( float height, float radius, int32 circleSections, bool smoothNormals, bool useUniqueTexture, bool addBottomCap,
-		FProcMeshTangent& tangent);
+	void BuildPiramid( float height, float radius, int32 circleSections, bool smoothNormals, bool useUniqueTexture, bool addBottomCap);
 
 	/** Generates a sphere from input values*/
-	void BuildSphere(FVector center, float radius, int32 circleSections, int32 heightSections, bool smoothNormals, bool useUniqueTexture,
-		FProcMeshTangent& tangent);
+	void BuildSphere(FVector center, float radius, int32 circleSections, int32 heightSections, bool smoothNormals, bool useUniqueTexture);
 
 	/** Generates a tube from input values*/
-	void BuildTube(FVector startPoint, FVector endPoint, FVector startRotation, FVector endRotation, float startRadius, float endRadius, int32 circleSections, bool smoothNormals, bool useUniqueTexture, bool addCaps,
-		FProcMeshTangent& tangent);
+	void BuildTube(FVector startPoint, FVector endPoint, FVector startRotation, FVector endRotation, float startRadius, float endRadius, int32 circleSections, bool smoothNormals, bool useUniqueTexture, bool addCaps);
 
 	/** The material to use in this mesh*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")

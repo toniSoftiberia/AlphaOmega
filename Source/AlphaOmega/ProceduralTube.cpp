@@ -11,6 +11,6 @@ void AProceduralTube::GenerateMesh() {
 
 	FVector orientation = startPoint - endRotation;
 
-	BuildTube(startPoint, endPoint, startRotation, endRotation, startRadius, endRadius, circleSections, smoothNormals, useUniqueTexture, addCaps, tangent);
+	BuildTube(startPoint, endPoint, startRotation, endRotation, startRadius, endRadius, circleSections, smoothNormals, useUniqueTexture, addCaps);
 }
 

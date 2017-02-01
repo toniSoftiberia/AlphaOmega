@@ -5,10 +5,10 @@
 
 
 
+/** Sets up the values to generate the desired figure*/
 void AProceduralCube::GenerateMesh() {
 
-	FProcMeshTangent tangent = FProcMeshTangent(1, 1, 1);
-
-	BuildCube(cubeSize, tangent);
+	// We only need to call the method to build a cube with the desired parameters
+	BuildCube(cubeSize);
 }
 

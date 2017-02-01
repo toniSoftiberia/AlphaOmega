@@ -3,16 +3,10 @@
 #include "AlphaOmega.h"
 #include "ProceduralTriangle.h"
 
-
+/** Sets up the values to generate the desired figure*/
 void AProceduralTriangle::GenerateMesh() {
 
-	FVector normal = FVector::CrossProduct(vertexC - vertexA, vertexB - vertexA).GetSafeNormal();
-
-	FProcMeshTangent tangent = FProcMeshTangent(1, 1, 1);
-
-	BuildTriangle(
-		vertexA, vertexB, vertexC,
-		normal,
-		tangent);
+	// We only need to call the method to build a sphere with the desired parameters
+	BuildTriangle(vertexA, vertexB, vertexC);
 }
 

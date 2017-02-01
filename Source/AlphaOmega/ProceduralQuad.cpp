@@ -4,15 +4,9 @@
 #include "ProceduralQuad.h"
 
 
-
+/** Sets up the values to generate the desired figure*/
 void AProceduralQuad::GenerateMesh() {
 
-	FVector normal = FVector::CrossProduct(topRight - topLeft, bottomLeft - topLeft).GetSafeNormal();
-
-	FProcMeshTangent tangent = FProcMeshTangent(1, 1, 1);
-
-	BuildQuad(
-		bottomLeft, bottomRight, topRight, topLeft,
-		normal,
-		tangent);
+	// We only need to call the method to build a quad with the desired parameters
+	BuildQuad(bottomLeft, bottomRight, topRight, topLeft);
 }

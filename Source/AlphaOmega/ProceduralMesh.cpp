@@ -52,7 +52,7 @@ void AProceduralMesh::BeginPlay()
 
 	GenerateMesh();
 
-	mesh->CreateMeshSection(1, vertices, triangles, normals, UV0s, TArray<FColor>(), TArray<FProcMeshTangent>(), false);
+	mesh->CreateMeshSection(1, vertices, triangles, normals, UV0s, TArray<FColor>(), tangents, false);
 
 	mesh->SetMaterial(1, material);
 }
@@ -85,12 +85,7 @@ void AProceduralMesh::GenerateMesh() {
 
 
 /** Generates a triangle from input vertices*/
-void AProceduralMesh::BuildTriangle(FVector vertexA, FVector vertexB, FVector vertexC,
-	FVector& normal, FProcMeshTangent& tangent) {
-
-	// From default all normals look at the same way
-	if (normal == FVector::ZeroVector)
-		normal = FVector::CrossProduct(vertexC - vertexA, vertexB - vertexA).GetSafeNormal();
+void AProceduralMesh::BuildTriangle(FVector vertexA, FVector vertexB, FVector vertexC) {
 
 	vertices.Add(vertexA);
 	vertices.Add(vertexB);
@@ -104,10 +99,17 @@ void AProceduralMesh::BuildTriangle(FVector vertexA, FVector vertexB, FVector ve
 	triangles.Add(vertexOffset++);
 	triangles.Add(vertexOffset++);
 
+	// By default all normals look at the same way
+	FVector normal = FVector::CrossProduct(vertexC - vertexA, vertexB - vertexA).GetSafeNormal();
 	normals.Add(normal);
 	normals.Add(normal);
 	normals.Add(normal);
-	
+
+	// Tangents (perpendicular to the surface)
+	FVector SurfaceTangent = vertexA - vertexA;
+	SurfaceTangent = SurfaceTangent.GetSafeNormal();
+	FProcMeshTangent tangent = FProcMeshTangent(SurfaceTangent, true);
+
 	tangents.Add(tangent);
 	tangents.Add(tangent);
 	tangents.Add(tangent);
@@ -116,13 +118,7 @@ void AProceduralMesh::BuildTriangle(FVector vertexA, FVector vertexB, FVector ve
 
 
 /** Generates a quad from input vertices*/
-void AProceduralMesh::BuildQuad(
-	FVector bottomLeft, FVector bottomRight, FVector topRight, FVector topLeft,
-	FVector& normal, FProcMeshTangent& tangent) {
-
-	// From default all normals look at the same way
-	if (normal == FVector::ZeroVector)
-		normal = FVector::CrossProduct(topRight - topLeft, bottomLeft - topLeft).GetSafeNormal();
+void AProceduralMesh::BuildQuad(FVector bottomLeft, FVector bottomRight, FVector topRight, FVector topLeft) {
 
 	int32 index1 = vertexOffset++;
 	int32 index2 = vertexOffset++;
@@ -139,6 +135,7 @@ void AProceduralMesh::BuildQuad(
 	UV0s.Add(FVector2D(1.0f, 0.0f));
 	UV0s.Add(FVector2D(0.0f, 0.0f));
 
+	// Here we have to indicate 2 triangles
 	triangles.Add(index1);
 	triangles.Add(index2);
 	triangles.Add(index3);
@@ -146,11 +143,17 @@ void AProceduralMesh::BuildQuad(
 	triangles.Add(index3);
 	triangles.Add(index4);
 
+	// By default all normals look at the same way
+	FVector	normal = FVector::CrossProduct(topRight - topLeft, bottomLeft - topLeft).GetSafeNormal();
 	normals.Add(normal);
 	normals.Add(normal);
 	normals.Add(normal);
 	normals.Add(normal);
 
+	// Tangents (perpendicular to the surface)
+	FVector SurfaceTangent = bottomLeft - bottomRight;
+	SurfaceTangent = SurfaceTangent.GetSafeNormal();
+	FProcMeshTangent tangent = FProcMeshTangent(SurfaceTangent, true);
 	tangents.Add(tangent);
 	tangents.Add(tangent);
 	tangents.Add(tangent);
@@ -159,7 +162,7 @@ void AProceduralMesh::BuildQuad(
 
 
 /** Generates a cube of cubesize size*/
-void AProceduralMesh::BuildCube(FVector cubeSize, FProcMeshTangent& tangent){
+void AProceduralMesh::BuildCube(FVector cubeSize){
 
 	// Calculate a half offset so we get correct center of object
 	float offsetX = cubeSize.X / 2.0f;
@@ -178,33 +181,32 @@ void AProceduralMesh::BuildCube(FVector cubeSize, FProcMeshTangent& tangent){
 
 	// Front (+X) face: 0-1-2-3
 	FVector normal = FVector::ForwardVector;
-	BuildQuad(p0, p1, p2, p3, normal, tangent);
+	BuildQuad(p0, p1, p2, p3);
 
 	// Back (-X) face: 5-4-7-6
 	normal = -FVector::ForwardVector;
-	BuildQuad(p5, p4, p7, p6, normal, tangent);
+	BuildQuad(p5, p4, p7, p6);
 
 	// Left (-Y) face: 1-5-6-2
 	normal = -FVector::RightVector;
-	BuildQuad(p1, p5, p6, p2, normal, tangent);
+	BuildQuad(p1, p5, p6, p2);
 
 	// Right (+Y) face: 4-0-3-7
 	normal = FVector::RightVector;
-	BuildQuad(p4, p0, p3, p7, normal, tangent);
+	BuildQuad(p4, p0, p3, p7);
 
 	// Top (+Z) face: 6-7-3-2
 	normal = FVector::UpVector;
-	BuildQuad(p6, p7, p3, p2, normal, tangent);
+	BuildQuad(p6, p7, p3, p2);
 
 	// Bottom (-Z) face: 1-0-4-5
 	normal = -FVector::UpVector;
-	BuildQuad(p1, p0, p4, p5, normal, tangent);
+	BuildQuad(p1, p0, p4, p5);
 }
 
 
 /** Generates a piramid from input values*/
-void AProceduralMesh::BuildPiramid(float height, float radius, int32 circleSections, bool smoothNormals, bool useUniqueTexture, bool addBottomCap,
-	FProcMeshTangent& tangent) {
+void AProceduralMesh::BuildPiramid(float height, float radius, int32 circleSections, bool smoothNormals, bool useUniqueTexture, bool addBottomCap) {
 
 	
 	// Calculates angle between quads an UV0s
@@ -228,11 +230,8 @@ void AProceduralMesh::BuildPiramid(float height, float radius, int32 circleSecti
 		FVector p0 = (FVector(FMath::Cos(angle) * radius, FMath::Sin(angle) * radius, 0.f));
 		FVector p1 = (FVector(FMath::Cos(nextAngle) * radius, FMath::Sin(nextAngle) * radius, 0.f));
 
-		// Calculate face normal
-		FVector currentNormal = FVector::CrossProduct(p0 - offset, p1 - offset).GetSafeNormal();
-
 		// Generate the triangle
-		BuildTriangle(p1, p0, offset, currentNormal, tangent);
+		BuildTriangle(p1, p0, offset);
 
 		// If we use a unique texture, we need to recalculate the UVs using vMapPerQuad
 		if (useUniqueTexture){
@@ -256,14 +255,8 @@ void AProceduralMesh::BuildPiramid(float height, float radius, int32 circleSecti
 		// We only need one cap in this figure the first triangle is not drawed
 		if (triIndex != 0 && addBottomCap)
 		{
-			// Calculates the cap normal
-			currentNormal = FVector::CrossProduct(vertices[vertices.Num() - 3] - vertices[vertices.Num() - 1], vertices[vertices.Num() - 2] - vertices[vertices.Num() - 1]).GetSafeNormal();
-
 			// Generate the triangle
-			BuildTriangle(
-				pInit, p0, p1,
-				currentNormal,
-				tangent);
+			BuildTriangle( pInit, p0, p1);
 
 			// Change the default UV0s to use an unique texture
 			UV0s[UV0s.Num() - 3] = FVector2D(0.5f - (FMath::Cos(0) / 2.0f), 0.5f - (FMath::Sin(0) / 2.0f));
@@ -281,8 +274,7 @@ void AProceduralMesh::BuildPiramid(float height, float radius, int32 circleSecti
 
 
 /** Generates a sphere from input values*/
-void AProceduralMesh::BuildSphere(FVector center, float radius, int32 circleSections, int32 heightSections, bool smoothNormals, bool useUniqueTexture,
-	FProcMeshTangent& tangent) {
+void AProceduralMesh::BuildSphere(FVector center, float radius, int32 circleSections, int32 heightSections, bool smoothNormals, bool useUniqueTexture) {
 
 	// Calculates angle between quads an UV0s for latitude and altitude
 	const float angleBetweenAltitude = 360.0f / (float)circleSections;
@@ -316,14 +308,10 @@ void AProceduralMesh::BuildSphere(FVector center, float radius, int32 circleSect
 			FVector p5 = UProceduralUtils::RotatePointAroundPivot(pInitStart, center, FVector(.0f, -angleLatitude, angleAltitude));
 			FVector p6 = UProceduralUtils::RotatePointAroundPivot(pInitStart, center, FVector(.0f, -nextAngleLatitude, angleAltitude));
 			FVector p7 = UProceduralUtils::RotatePointAroundPivot(pInitStart, center, FVector(.0f, -nextAngleLatitude, nextAngleAltitude));
-
-			// Calculate face normals
-			FVector topNormal = (((p3 + p2 + p1 + p0) / 4) - center).GetSafeNormal();
-			FVector botomNormal = (((p7 + p6 + p5 + p4) / 4) - center).GetSafeNormal();
-
+			
 			// Generate the quads
-			BuildQuad(p3, p2, p1, p0, topNormal, tangent);
-			BuildQuad(p7, p6, p5, p4, botomNormal, tangent);
+			BuildQuad(p3, p2, p1, p0);
+			BuildQuad(p7, p6, p5, p4);
 
 			// If we use a unique texture, we need to recalculate the UVs using vMapPerQuad
 			if (useUniqueTexture){
@@ -357,8 +345,7 @@ void AProceduralMesh::BuildSphere(FVector center, float radius, int32 circleSect
 }
 
 /** Generates a tube from input values*/
-void AProceduralMesh::BuildTube(FVector startPoint, FVector endPoint, FVector startRotation, FVector endRotation, float startRadius, float endRadius, int32 circleSections, bool smoothNormals, bool useUniqueTexture, bool addCaps,
-	FProcMeshTangent& tangent) {
+void AProceduralMesh::BuildTube(FVector startPoint, FVector endPoint, FVector startRotation, FVector endRotation, float startRadius, float endRadius, int32 circleSections, bool smoothNormals, bool useUniqueTexture, bool addCaps) {
 
 	// Get prisma orientation and flip it to get its perpendicular
 	FVector orientation = endPoint - startPoint;
@@ -403,7 +390,7 @@ void AProceduralMesh::BuildTube(FVector startPoint, FVector endPoint, FVector st
 		// Cause we allways rotate 90 degrees in X axis we need to correct it when orientation is bigger in Z axis
 		// If we aren't drawing a simple tube and its orientation is bigger in Z axis
 		if (!comingFromSimpleTube && FMath::Abs(orientation.Z) > FMath::Abs(orientation.Y) && FMath::Abs(orientation.Z) > FMath::Abs(orientation.X)) {
-			float angle = 45.f;
+			float angleCorrection = 45.f;
 
 			// For up to down tube orientations
 			if (endPoint.Z > startPoint.Z) {
@@ -424,12 +411,9 @@ void AProceduralMesh::BuildTube(FVector startPoint, FVector endPoint, FVector st
 		p1 = UProceduralUtils::RotatePointAroundPivot(p1, endPoint, (endRotation).Rotation().Add(90.f, 0.f, 0.f).Euler());
 		p2 = UProceduralUtils::RotatePointAroundPivot(p2, startPoint, (startRotation).Rotation().Add(correction.X, correction.Y, correction.Z).Euler());
 		p3 = UProceduralUtils::RotatePointAroundPivot(p3, startPoint, (startRotation).Rotation().Add(correction.X, correction.Y, correction.Z).Euler());
-
-		// Calculates the face normal
-		FVector currentNormal = FVector::CrossProduct(p1 - p3, p2 - p3).GetSafeNormal();
-
+		
 		// Generate the quad
-		BuildQuad(p0, p1, p3, p2, currentNormal, tangent);
+		BuildQuad(p0, p1, p3, p2);
 
 		// If we use a unique texture, we need to recalculate the UVs using vMapPerQuad
 		if (useUniqueTexture){
@@ -459,13 +443,9 @@ void AProceduralMesh::BuildTube(FVector startPoint, FVector endPoint, FVector st
 		// A better looking method uses a vertex in the center of the circle, but uses two more polygons.  We will demonstrate that in a different sample.
 		if (quadIndex != 0 && addCaps){
 
-			// Calculates cap normals
-			FVector startCapNormal = -startRotation.GetSafeNormal();
-			FVector endCapNormal = endRotation.GetSafeNormal();
-
 			// Generate the triangles
-			BuildTriangle(pInitStart, p2, p3, startCapNormal, tangent);
-			BuildTriangle(p1, p0, pInitEnd, endCapNormal, tangent);
+			BuildTriangle(pInitStart, p2, p3);
+			BuildTriangle(p1, p0, pInitEnd);
 
 			// Recalculate the UVS to use an unique texture
 			UV0s[UV0s.Num() - 6] = FVector2D(0.5f - (FMath::Cos(0) / 2.0f), 0.5f - (FMath::Sin(0) / 2.0f));
