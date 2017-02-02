@@ -49,8 +49,6 @@ struct FProceduralVertex
 	}
 };
 
-
-
 /**
  * Here we allocate the static common functions for the project
  */

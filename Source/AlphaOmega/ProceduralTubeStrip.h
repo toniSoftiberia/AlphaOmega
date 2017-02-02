@@ -6,6 +6,38 @@
 #include "ProceduralTubeStrip.generated.h"
 
 /**
+* Stores the data needed for a point of a strip tube
+*/
+USTRUCT()
+struct FStripPoint
+{
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Procedural Parameters")
+		FVector position;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Procedural Parameters")
+		FVector rotation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Procedural Parameters")
+		float radius;
+
+	/** Overloaded constructor*/
+	FStripPoint(const FVector& newPosition, const FVector& newRotation, const float& newRadius) {
+		position = newPosition;
+		rotation = newRotation;
+		radius = newRadius;
+	}
+
+	/** base constructor*/
+	FStripPoint() {
+		position = FVector::ZeroVector;
+		rotation = FVector::ZeroVector;
+		radius = 0.0f;
+	}
+};
+
+/**
 * This child class of procedural mesh generates a piramid
 */
 UCLASS()
@@ -17,7 +49,6 @@ class ALPHAOMEGA_API AProceduralTubeStrip : public AProceduralMesh
 	virtual void GenerateMesh();
 
 public:
-
 	/** Allocates the points of the tube strip*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
 		TArray<FVector> LinePoints;
@@ -37,6 +68,11 @@ public:
 	/** Allocates the end radius of the tube strip*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
 		float endRadius;
+
+
+	/** Allocates the points of the tube strip*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
+		TArray<FStripPoint> stripPoints;
 
 	/** Allocates the number of faces of each tube*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")

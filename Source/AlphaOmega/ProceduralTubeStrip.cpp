@@ -3,30 +3,32 @@
 #include "AlphaOmega.h"
 #include "ProceduralTubeStrip.h"
 
+
+
 void AProceduralTubeStrip::GenerateMesh() {
 
-	// Now we create 6x faces, 4 vertices each
-	FProcMeshTangent tangent = FProcMeshTangent(1,1,1);
+	if (stripPoints.Num() > 2) {
 
-	FVector vectorA = LinePoints[1] - LinePoints[0];
-	FVector vectorB = LinePoints[1] - LinePoints[2];
-	FVector rotationA = (vectorA.GetSafeNormal() - vectorB.GetSafeNormal()).GetSafeNormal();
+		FVector vectorA = stripPoints[1].position - stripPoints[0].position;
+		FVector vectorB = stripPoints[1].position - stripPoints[2].position;
+		FVector rotationA = (vectorA.GetSafeNormal() - vectorB.GetSafeNormal()).GetSafeNormal();
 
-	vectorA = LinePoints[2] - LinePoints[1];
-	vectorB = LinePoints[2] - LinePoints[3];
-	FVector rotationB = (vectorA.GetSafeNormal() - vectorB.GetSafeNormal()).GetSafeNormal();
+		vectorA = stripPoints[2].position - stripPoints[1].position;
+		vectorB = stripPoints[2].position - stripPoints[3].position;
+		FVector rotationB = (vectorA.GetSafeNormal() - vectorB.GetSafeNormal()).GetSafeNormal();
 
-	vectorA = LinePoints[3] - LinePoints[2];
-	vectorB = LinePoints[3] - LinePoints[0];
-	FVector rotationC = (vectorA.GetSafeNormal() - vectorB.GetSafeNormal()).GetSafeNormal();
+		vectorA = stripPoints[3].position - stripPoints[2].position;
+		vectorB = stripPoints[3].position - stripPoints[0].position;
+		FVector rotationC = (vectorA.GetSafeNormal() - vectorB.GetSafeNormal()).GetSafeNormal();
 
-	vectorA = LinePoints[0] - LinePoints[3];
-	vectorB = LinePoints[0] - LinePoints[1];
-	FVector rotationD = (vectorA.GetSafeNormal() - vectorB.GetSafeNormal()).GetSafeNormal();
+		vectorA = stripPoints[0].position - stripPoints[3].position;
+		vectorB = stripPoints[0].position - stripPoints[1].position;
+		FVector rotationD = (vectorA.GetSafeNormal() - vectorB.GetSafeNormal()).GetSafeNormal();
 
-	BuildTube(LinePoints[0], LinePoints[1], rotationD, rotationA, startRadius, startRadius, circleSections, smoothNormals, useUniqueTexture, addCaps);
-	BuildTube(LinePoints[1], LinePoints[2], rotationA, rotationB, startRadius, startRadius, circleSections, smoothNormals, useUniqueTexture, addCaps);
-	BuildTube(LinePoints[2], LinePoints[3], rotationB, rotationC, startRadius, startRadius, circleSections, smoothNormals, useUniqueTexture, addCaps);
-	BuildTube(LinePoints[3], LinePoints[0], rotationC, rotationD, startRadius, startRadius, circleSections, smoothNormals, useUniqueTexture, addCaps);
+		BuildTube(stripPoints[0].position, stripPoints[1].position, rotationD, rotationA, stripPoints[0].radius, stripPoints[1].radius, circleSections, smoothNormals, useUniqueTexture, addCaps);
+		BuildTube(stripPoints[1].position, stripPoints[2].position, rotationA, rotationB, stripPoints[1].radius, stripPoints[2].radius, circleSections, smoothNormals, useUniqueTexture, addCaps);
+		BuildTube(stripPoints[2].position, stripPoints[3].position, rotationB, rotationC, stripPoints[2].radius, stripPoints[3].radius, circleSections, smoothNormals, useUniqueTexture, addCaps);
+		BuildTube(stripPoints[3].position, stripPoints[0].position, rotationC, rotationD, stripPoints[3].radius, stripPoints[0].radius, circleSections, smoothNormals, useUniqueTexture, addCaps);
+	}
 }
 
