@@ -8,27 +8,48 @@
 void AProceduralTubeStrip::GenerateMesh() {
 
 	if (stripPoints.Num() > 2) {
+		
+		FVector orientationBack = stripPoints[0].position - stripPoints[stripPoints.Num()-1].position;
+		FVector orientationForward = stripPoints[0].position - stripPoints[1].position;
+		FVector rotation0 = orientationBack.GetSafeNormal();
+		FVector rotationEnd = rotation0;
+		FVector rotationStart;
 
-		FVector vectorA = stripPoints[1].position - stripPoints[0].position;
-		FVector vectorB = stripPoints[1].position - stripPoints[2].position;
-		FVector rotationA = (vectorA.GetSafeNormal() - vectorB.GetSafeNormal()).GetSafeNormal();
+		if (isClosedStrip){ 
+			rotation0 = rotationEnd = (orientationBack.GetSafeNormal() - orientationForward.GetSafeNormal()).GetSafeNormal();
+		}
 
-		vectorA = stripPoints[2].position - stripPoints[1].position;
-		vectorB = stripPoints[2].position - stripPoints[3].position;
-		FVector rotationB = (vectorA.GetSafeNormal() - vectorB.GetSafeNormal()).GetSafeNormal();
+		bool startCap;
+		bool endCap;
 
-		vectorA = stripPoints[3].position - stripPoints[2].position;
-		vectorB = stripPoints[3].position - stripPoints[0].position;
-		FVector rotationC = (vectorA.GetSafeNormal() - vectorB.GetSafeNormal()).GetSafeNormal();
+		for (int i = 1; i < stripPoints.Num(); ++i) {
 
-		vectorA = stripPoints[0].position - stripPoints[3].position;
-		vectorB = stripPoints[0].position - stripPoints[1].position;
-		FVector rotationD = (vectorA.GetSafeNormal() - vectorB.GetSafeNormal()).GetSafeNormal();
+			startCap = i == 1 && addCaps;
+			endCap = i == stripPoints.Num() - 1 && addCaps;
 
-		BuildTube(stripPoints[0].position, stripPoints[1].position, rotationD, rotationA, stripPoints[0].radius, stripPoints[1].radius, circleSections, smoothNormals, useUniqueTexture, addCaps);
-		BuildTube(stripPoints[1].position, stripPoints[2].position, rotationA, rotationB, stripPoints[1].radius, stripPoints[2].radius, circleSections, smoothNormals, useUniqueTexture, addCaps);
-		BuildTube(stripPoints[2].position, stripPoints[3].position, rotationB, rotationC, stripPoints[2].radius, stripPoints[3].radius, circleSections, smoothNormals, useUniqueTexture, addCaps);
-		BuildTube(stripPoints[3].position, stripPoints[0].position, rotationC, rotationD, stripPoints[3].radius, stripPoints[0].radius, circleSections, smoothNormals, useUniqueTexture, addCaps);
+			int nextIndex = i < stripPoints.Num() - 1 ? i + 1 : 0;
+
+			rotationStart = rotationEnd;
+
+			orientationBack = stripPoints[i].position - stripPoints[i-1].position;
+			orientationForward = stripPoints[i].position - stripPoints[nextIndex].position;
+
+			rotationEnd = (orientationBack.GetSafeNormal() - orientationForward.GetSafeNormal()).GetSafeNormal();
+
+			if (i == 1 && !isClosedStrip)
+				rotationStart = orientationBack.GetSafeNormal();
+			if (nextIndex == 0 && !isClosedStrip)
+				rotationEnd = orientationBack.GetSafeNormal();
+
+			BuildTube(stripPoints[i-1].position, stripPoints[i].position, rotationStart, rotationEnd, stripPoints[i-1].radius, stripPoints[i].radius, circleSections, smoothNormals, useUniqueTexture, startCap, endCap);
+		
+		}
+
+		if (isClosedStrip) {
+
+			BuildTube(stripPoints[stripPoints.Num() - 1].position, stripPoints[0].position, rotationEnd, rotation0, stripPoints[stripPoints.Num() - 1].radius, stripPoints[0].radius, circleSections, smoothNormals, useUniqueTexture, false, false);
+		}
+		
 	}
 }
 

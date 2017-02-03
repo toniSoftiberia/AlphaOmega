@@ -49,30 +49,14 @@ class ALPHAOMEGA_API AProceduralTubeStrip : public AProceduralMesh
 	virtual void GenerateMesh();
 
 public:
-	/** Allocates the points of the tube strip*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
-		TArray<FVector> LinePoints;
-
-	/** Allocates the start rotation of the tube strip*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
-		FVector startRotation;
-
-	/** Allocates the end rotation of the tube strip*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
-		FVector endRotation;
-
-	/** Allocates the start radius of the tube strip*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
-		float startRadius;
-
-	/** Allocates the end radius of the tube strip*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
-		float endRadius;
-
 
 	/** Allocates the points of the tube strip*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
 		TArray<FStripPoint> stripPoints;
+
+	/** Allocates the points of the tube strip*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
+		TArray<AActor*> sstripPoints;
 
 	/** Allocates the number of faces of each tube*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
@@ -88,5 +72,9 @@ public:
 
 	/** Handles if its draw a bottom cap*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
-		bool addCaps;	
+		bool addCaps;
+
+	/** Handles if its draw a bottom cap*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
+		bool isClosedStrip;
 };

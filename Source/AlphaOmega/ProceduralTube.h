@@ -42,6 +42,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
 		float endRadius;
 
+	/** Handles if its draw a start cap*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
+		bool addStartCap;
+
+	/** Handles if its draw an end cap*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
+		bool addEndCap;
+
 	/** Allocates the number of faces of the tube*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
 		int32 circleSections;
@@ -52,9 +60,5 @@ public:
 
 	/** Handles if its use an unique texture*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
-		bool useUniqueTexture;
-
-	/** Handles if its draw a bottom cap*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
-		bool addCaps;	
+		bool useUniqueTexture;	
 };

@@ -345,7 +345,7 @@ void AProceduralMesh::BuildSphere(FVector center, float radius, int32 circleSect
 }
 
 /** Generates a tube from input values*/
-void AProceduralMesh::BuildTube(FVector startPoint, FVector endPoint, FVector startRotation, FVector endRotation, float startRadius, float endRadius, int32 circleSections, bool smoothNormals, bool useUniqueTexture, bool addCaps) {
+void AProceduralMesh::BuildTube(FVector startPoint, FVector endPoint, FVector startRotation, FVector endRotation, float startRadius, float endRadius, int32 circleSections, bool smoothNormals, bool useUniqueTexture, bool addStartCap, bool addEndCap) {
 
 	// Get prisma orientation and flip it to get its perpendicular
 	FVector orientation = endPoint - startPoint;
@@ -438,27 +438,29 @@ void AProceduralMesh::BuildTube(FVector startPoint, FVector endPoint, FVector st
 		}
 
 
-		// Here we need a start cap and end cap
+		
 		// Caps are closed here by triangles that start at 0, then use the points along the circle for the other two corners.
 		// A better looking method uses a vertex in the center of the circle, but uses two more polygons.  We will demonstrate that in a different sample.
-		if (quadIndex != 0 && addCaps){
+		if (quadIndex != 0 && addStartCap) {
 
 			// Generate the triangles
 			BuildTriangle(pInitStart, p2, p3);
+
+			// Recalculate the UVS to use an unique texture
+			UV0s[UV0s.Num() - 3] = FVector2D(0.5f - (FMath::Cos(0) / 2.0f), 0.5f - (FMath::Sin(0) / 2.0f));
+			UV0s[UV0s.Num() - 2] = FVector2D(0.5f - (FMath::Cos(-nextAngle) / 2.0f), 0.5f - (FMath::Sin(-nextAngle) / 2.0f));
+			UV0s[UV0s.Num() - 1] = FVector2D(0.5f - (FMath::Cos(-angle) / 2.0f), 0.5f - (FMath::Sin(-angle) / 2.0f));
+		}		
+		
+		if (quadIndex != 0 && addEndCap) {
+
+			// Generate the triangles
 			BuildTriangle(p1, p0, pInitEnd);
 
 			// Recalculate the UVS to use an unique texture
-			UV0s[UV0s.Num() - 6] = FVector2D(0.5f - (FMath::Cos(0) / 2.0f), 0.5f - (FMath::Sin(0) / 2.0f));
-			UV0s[UV0s.Num() - 5] = FVector2D(0.5f - (FMath::Cos(-nextAngle) / 2.0f), 0.5f - (FMath::Sin(-nextAngle) / 2.0f));
-			UV0s[UV0s.Num() - 4] = FVector2D(0.5f - (FMath::Cos(-angle) / 2.0f), 0.5f - (FMath::Sin(-angle) / 2.0f));
 			UV0s[UV0s.Num() - 1] = FVector2D(0.5f - (FMath::Cos(0) / 2.0f), 0.5f - (FMath::Sin(0) / 2.0f));
 			UV0s[UV0s.Num() - 2] = FVector2D(0.5f - (FMath::Cos(-nextAngle) / 2.0f), 0.5f - (FMath::Sin(-nextAngle) / 2.0f));
 			UV0s[UV0s.Num() - 3] = FVector2D(0.5f - (FMath::Cos(-angle) / 2.0f), 0.5f - (FMath::Sin(-angle) / 2.0f));
-			
-			/*
-			// Tangents (perpendicular to the surface)
-			FVector surfaceTangent = p1 - p0;
-			surfaceTangent = surfaceTangent.GetSafeNormal();*/
 		}
 	}
 }
