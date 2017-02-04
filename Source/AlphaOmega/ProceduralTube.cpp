@@ -9,8 +9,8 @@
 void AProceduralTube::GenerateMesh() {
 
 	// Here we need to look for orientation of the tube
-	FVector orientation = startPoint - endRotation;
+	FVector orientation = startPoint.GetLocation() - endPoint.GetLocation();
 
-	BuildTube(startPoint, endPoint, startRotation, endRotation, startRadius, endRadius, circleSections, smoothNormals, useUniqueTexture, addStartCap, addEndCap);
+	BuildTube(startPoint.GetLocation(), endPoint.GetLocation(), startRotation, endRotation, startRadius, endRadius, circleSections, smoothNormals, useUniqueTexture, addStartCap, addEndCap);
 }
 

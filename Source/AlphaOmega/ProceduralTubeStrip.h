@@ -51,12 +51,8 @@ class ALPHAOMEGA_API AProceduralTubeStrip : public AProceduralMesh
 public:
 
 	/** Allocates the points of the tube strip*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
-		TArray<FStripPoint> stripPoints;
-
-	/** Allocates the points of the tube strip*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
-		TArray<AActor*> sstripPoints;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters", meta = (MakeEditWidget))
+		TArray<FTransform> stripPoints;
 
 	/** Allocates the number of faces of each tube*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")

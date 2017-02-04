@@ -29,7 +29,7 @@ protected:
 	AProceduralMesh();
 
 	/** Used for editing meshes on realtime*/
-	//void OnConstruction(const FTransform& Transform) override;
+	void OnConstruction(const FTransform& Transform) override;
 
 #endif
 

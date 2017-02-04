@@ -4,13 +4,14 @@
 #include "ProceduralTubeStrip.h"
 
 
-
 void AProceduralTubeStrip::GenerateMesh() {
 
-	if (sstripPoints.Num() > 2) {
+	if (stripPoints.Num() > 2) {
 		
-		FVector orientationBack = sstripPoints[0]->GetActorLocation() - sstripPoints[sstripPoints.Num()-1]->GetActorLocation();
-		FVector orientationForward = sstripPoints[0]->GetActorLocation() - sstripPoints[1]->GetActorLocation();
+		FTransform test;
+
+		FVector orientationBack = stripPoints[0].GetLocation() - stripPoints[stripPoints.Num()-1].GetLocation();
+		FVector orientationForward = stripPoints[0].GetLocation() - stripPoints[1].GetLocation();
 		FVector rotation0 = orientationBack.GetSafeNormal();
 		FVector rotationEnd = rotation0;
 		FVector rotationStart;
@@ -22,32 +23,34 @@ void AProceduralTubeStrip::GenerateMesh() {
 		bool startCap;
 		bool endCap;
 
-		for (int i = 1; i < sstripPoints.Num(); ++i) {
+		for (int i = 1; i < stripPoints.Num(); ++i) {
+
+			UE_LOG(LogClass, Log, TEXT("stripPoints[i].GetLocation(): %s"), *(stripPoints[i].GetLocation()).ToString());
 
 			startCap = i == 1 && addCaps;
-			endCap = i == sstripPoints.Num() - 1 && addCaps;
+			endCap = i == stripPoints.Num() - 1 && addCaps;
 
-			int nextIndex = i < sstripPoints.Num() - 1 ? i + 1 : 0;
+			int nextIndex = i < stripPoints.Num() - 1 ? i + 1 : 0;
 
 			rotationStart = rotationEnd;
 
-			orientationBack = sstripPoints[i]->GetActorLocation() - sstripPoints[i-1]->GetActorLocation();
-			orientationForward = sstripPoints[i]->GetActorLocation() - sstripPoints[nextIndex]->GetActorLocation();
+			orientationBack = stripPoints[i].GetLocation() - stripPoints[i-1].GetLocation();
+			orientationForward = stripPoints[i].GetLocation() - stripPoints[nextIndex].GetLocation();
 
 			rotationEnd = (orientationBack.GetSafeNormal() - orientationForward.GetSafeNormal()).GetSafeNormal();
 
 			if (i == 1 && !isClosedStrip)
-				rotationStart = orientationBack.GetSafeNormal();
+				rotationStart = FVector::ZeroVector;
 			if (nextIndex == 0 && !isClosedStrip)
-				rotationEnd = orientationBack.GetSafeNormal();
+				rotationEnd = FVector::ZeroVector;
 
-			BuildTube(sstripPoints[i-1]->GetActorLocation(), sstripPoints[i]->GetActorLocation(), rotationStart, rotationEnd, sstripPoints[i-1]->GetActorScale().X, sstripPoints[i]->GetActorScale().X, circleSections, smoothNormals, useUniqueTexture, startCap, endCap);
-		
+			BuildTube(stripPoints[i - 1].GetLocation(), stripPoints[i].GetLocation(), rotationStart, rotationEnd, stripPoints[i - 1].GetScale3D().X, stripPoints[i].GetScale3D().X, circleSections, smoothNormals, useUniqueTexture, startCap, endCap);
+			
 		}
 
 		if (isClosedStrip) {
 
-			BuildTube(sstripPoints[sstripPoints.Num() - 1]->GetActorLocation(), sstripPoints[0]->GetActorLocation(), rotationEnd, rotation0, sstripPoints[sstripPoints.Num() - 1]->GetActorScale().X, sstripPoints[0]->GetActorScale().X, circleSections, smoothNormals, useUniqueTexture, false, false);
+			BuildTube(stripPoints[stripPoints.Num() - 1].GetLocation(), stripPoints[0].GetLocation(), rotationEnd, rotation0, stripPoints[stripPoints.Num() - 1].GetScale3D().X, stripPoints[0].GetScale3D().X, circleSections, smoothNormals, useUniqueTexture, false, false);
 		}
 		
 	}

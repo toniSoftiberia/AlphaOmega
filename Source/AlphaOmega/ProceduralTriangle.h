@@ -18,15 +18,7 @@ class ALPHAOMEGA_API AProceduralTriangle : public AProceduralMesh
 
 public:
 
-	/** Allocates first vertex of the triangle*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
-		FVector vertexA;
-
-	/** Allocates second vertex of the triangle*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
-		FVector vertexB;
-
-	/** Allocates thirth vertex of the triangle*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
-		FVector vertexC;
+	/** Allocates the points of the tube strip*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters", meta = (MakeEditWidget))
+		TArray<FTransform> verticesLocation;
 };

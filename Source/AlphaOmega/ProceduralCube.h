@@ -19,7 +19,7 @@ class ALPHAOMEGA_API AProceduralCube : public AProceduralMesh
 public:
 
 	/** Allocates the desired size of the cube*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters", meta = (MakeEditWidget))
 	FVector cubeSize;	
 	
 };

@@ -7,6 +7,8 @@
 void AProceduralTriangle::GenerateMesh() {
 
 	// We only need to call the method to build a sphere with the desired parameters
-	BuildTriangle(vertexA, vertexB, vertexC);
+	if(verticesLocation.Num() == 3)
+		BuildTriangle(verticesLocation[0].GetLocation(), verticesLocation[1].GetLocation(), verticesLocation[2].GetLocation());
+
 }
 

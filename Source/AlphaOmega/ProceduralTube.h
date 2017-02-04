@@ -19,12 +19,12 @@ class ALPHAOMEGA_API AProceduralTube : public AProceduralMesh
 public:
 
 	/** Allocates the start point of the tube*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
-		FVector startPoint;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters", meta = (MakeEditWidget))
+		FTransform startPoint;
 
 	/** Allocates the end point of the tube*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
-		FVector endPoint;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters", meta = (MakeEditWidget))
+		FTransform endPoint;
 
 	/** Allocates the start rotation of the tube*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")

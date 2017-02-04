@@ -13,35 +13,45 @@ AProceduralMesh::AProceduralMesh()
 	PrimaryActorTick.bCanEverTick = false;
 
 	// Create a sphere component to see where the object  is in editor and make it root component
+	//DummyComp = CreateDefaultSubobject<USceneComponent>(TEXT("DummyComp"));
 	USphereComponent* SphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("RootComponent"));
 	RootComponent = SphereComponent;
 
 	// Creates the procedural mesh component and attach it to the root component
 	mesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("GeneratedMesh"));
+	//mesh->AttachToComponent(RootComponent, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 	mesh->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform);
+
 
 	// Cleans all sections to let it ready for use
 	mesh->ClearAllMeshSections();
 	mesh->ClearAllCachedCookedPlatformData();
-
 }
 
 
-/** Used for editing meshes on realtime
+/** Used for editing meshes on realtime*/
 void AProceduralMesh::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
 	// We need to re-construct the buffers since values can be changed in editor
+	vertices.Empty();
+	UV0s.Empty();
+	normals.Empty();
+	tangents.Empty();
+	triangles.Empty();
+	vertexOffset = 0;
 
-	//GenerateMesh();
+	GenerateMesh();
 
-	//mesh->CreateMeshSection(1, vertices, triangles, normals, UV0s, TArray<FColor>(), TArray<FProcMeshTangent>(), false);
+	// We also clean the mesh	
+	mesh->ClearAllMeshSections();
+	mesh->ClearAllCachedCookedPlatformData();
 
-	//mesh->UpdateMeshSection(1, vertices, normals, UV0, vertexColors, tangents);
+	mesh->CreateMeshSection(0, vertices, triangles, normals, UV0s, TArray<FColor>(), tangents, false);
 
-	//mesh->SetMaterial(1, material);
-}*/
+	mesh->SetMaterial(0, material);
+}
 #endif
 
 
@@ -52,9 +62,13 @@ void AProceduralMesh::BeginPlay()
 
 	GenerateMesh();
 
-	mesh->CreateMeshSection(1, vertices, triangles, normals, UV0s, TArray<FColor>(), tangents, false);
+	// We also clean the mesh	
+	mesh->ClearAllMeshSections();
+	mesh->ClearAllCachedCookedPlatformData();
 
-	mesh->SetMaterial(1, material);
+	mesh->CreateMeshSection(0, vertices, triangles, normals, UV0s, TArray<FColor>(), tangents, false);
+
+	mesh->SetMaterial(0, material);
 }
 
 
@@ -262,12 +276,6 @@ void AProceduralMesh::BuildPiramid(float height, float radius, int32 circleSecti
 			UV0s[UV0s.Num() - 3] = FVector2D(0.5f - (FMath::Cos(0) / 2.0f), 0.5f - (FMath::Sin(0) / 2.0f));
 			UV0s[UV0s.Num() - 2] = FVector2D(0.5f - (FMath::Cos(-angle) / 2.0f), 0.5f - (FMath::Sin(-angle) / 2.0f));
 			UV0s[UV0s.Num() - 1] = FVector2D(0.5f - (FMath::Cos(-nextAngle) / 2.0f), 0.5f - (FMath::Sin(-nextAngle) / 2.0f));
-
-			/*
-			// Tangents (perpendicular to the surface)
-			FVector surfaceTangent = p0 - p1;
-			surfaceTangent = surfaceTangent.GetSafeNormal();
-			*/
 		}
 	}
 }
@@ -348,17 +356,21 @@ void AProceduralMesh::BuildSphere(FVector center, float radius, int32 circleSect
 void AProceduralMesh::BuildTube(FVector startPoint, FVector endPoint, FVector startRotation, FVector endRotation, float startRadius, float endRadius, int32 circleSections, bool smoothNormals, bool useUniqueTexture, bool addStartCap, bool addEndCap) {
 
 	// Get prisma orientation and flip it to get its perpendicular
-	FVector orientation = endPoint - startPoint;
+	FVector orientation = (endPoint - startPoint).GetSafeNormal();
 
 	// Hanldes if we are drawing a unique tube
-	bool comingFromSimpleTube = false;
+	bool comingFromSimpleTubeStart = false;
+	bool comingFromSimpleTubeEnd = false;
 
 	// Checks if we are drawing a unique tube, if it is, we need to change the value of startRotation and endRotation
-	if (endRotation == FVector::ZeroVector || startRotation == FVector::ZeroVector) {
-		orientation = endPoint - startPoint;
-		startRotation = orientation;
+	if (endRotation == FVector::ZeroVector) {
 		endRotation = orientation;
-		comingFromSimpleTube = true;
+		comingFromSimpleTubeEnd = true;
+	}
+
+	if ( startRotation == FVector::ZeroVector) {
+		startRotation = orientation.Rotation().Add(0.f, 360.f, 0.f).Euler();
+		comingFromSimpleTubeStart = true;
 	}
 
 	// Calculates angle between quads an UV0s for for each face
@@ -368,8 +380,8 @@ void AProceduralMesh::BuildTube(FVector startPoint, FVector endPoint, FVector st
 	// Store the init point and rotate it to use it later for caps
 	FVector pInitStart = FVector(FMath::Cos(0) * startRadius, FMath::Sin(0) * startRadius, 0.f) + startPoint;
 	FVector pInitEnd = FVector(FMath::Cos(0) * endRadius, FMath::Sin(0) * endRadius, 0.f) + endPoint;
-	pInitStart = UProceduralUtils::RotatePointAroundPivot(pInitStart, startPoint, (startRotation).Rotation().Add(90.f, 0.f, 0.f).Euler());
-	pInitEnd = UProceduralUtils::RotatePointAroundPivot(pInitEnd, endPoint, (endRotation).Rotation().Add(90.f, 0.f, 0.f).Euler());
+	pInitStart = UProceduralUtils::RotatePointAroundPivot(pInitStart, startPoint, startRotation.Rotation().Add(90.f, 0.f, 0.f).Euler());
+	pInitEnd = UProceduralUtils::RotatePointAroundPivot(pInitEnd, endPoint, endRotation.Rotation().Add(90.f, 0.f, 0.f).Euler());
 
 	// Create all the sides of the tube
 	for (int32 quadIndex = 0; quadIndex < circleSections; quadIndex++){
@@ -385,12 +397,14 @@ void AProceduralMesh::BuildTube(FVector startPoint, FVector endPoint, FVector st
 		FVector p3 = (FVector(FMath::Cos(angle) * startRadius, FMath::Sin(angle) * startRadius, 0.f)) + startPoint;
 
 		// We have the direction of the tube, for the faces we need to rotate it 90 degrees
+
 		FVector correction = FVector(90.f, 0.f, 0.f);
 
 		// Cause we allways rotate 90 degrees in X axis we need to correct it when orientation is bigger in Z axis
 		// If we aren't drawing a simple tube and its orientation is bigger in Z axis
-		if (!comingFromSimpleTube && FMath::Abs(orientation.Z) > FMath::Abs(orientation.Y) && FMath::Abs(orientation.Z) > FMath::Abs(orientation.X)) {
+		if ((!comingFromSimpleTubeStart ) && FMath::Abs(orientation.Z) > FMath::Abs(orientation.Y) && FMath::Abs(orientation.Z) > FMath::Abs(orientation.X)) {
 			float angleCorrection = 45.f;
+			angleCorrection = 0.f;
 
 			// For up to down tube orientations
 			if (endPoint.Z > startPoint.Z) {
