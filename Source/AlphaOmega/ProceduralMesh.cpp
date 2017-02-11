@@ -282,7 +282,7 @@ void AProceduralMesh::BuildPiramid(float height, float radius, int32 circleSecti
 
 
 /** Generates a sphere from input values*/
-void AProceduralMesh::BuildSphere(FVector center, float radius, int32 circleSections, int32 heightSections, bool smoothNormals, bool useUniqueTexture) {
+void AProceduralMesh::BuildUVSphere(FVector center, float radius, int32 circleSections, int32 heightSections, bool smoothNormals, bool useUniqueTexture) {
 
 	// Calculates angle between quads an UV0s for latitude and altitude
 	const float angleBetweenAltitude = 360.0f / (float)circleSections;
@@ -294,7 +294,7 @@ void AProceduralMesh::BuildSphere(FVector center, float radius, int32 circleSect
 	FVector pInitStart = FVector(FMath::Cos(0) * radius, FMath::Sin(0) * radius, 0.f) + center;
 
 	// Generates all the circle sections
-	for (int32 i = 0; i < circleSections; ++i){
+	for (int32 i = 0; i < circleSections; ++i) {
 
 		// Calculates desired angle and nextangle for each circle section
 		float angleAltitude = (float)i * angleBetweenAltitude;
@@ -316,13 +316,13 @@ void AProceduralMesh::BuildSphere(FVector center, float radius, int32 circleSect
 			FVector p5 = UProceduralUtils::RotatePointAroundPivot(pInitStart, center, FVector(.0f, -angleLatitude, angleAltitude));
 			FVector p6 = UProceduralUtils::RotatePointAroundPivot(pInitStart, center, FVector(.0f, -nextAngleLatitude, angleAltitude));
 			FVector p7 = UProceduralUtils::RotatePointAroundPivot(pInitStart, center, FVector(.0f, -nextAngleLatitude, nextAngleAltitude));
-			
+
 			// Generate the quads
 			BuildQuad(p3, p2, p1, p0);
 			BuildQuad(p7, p6, p5, p4);
 
 			// If we use a unique texture, we need to recalculate the UVs using vMapPerQuad
-			if (useUniqueTexture){
+			if (useUniqueTexture) {
 
 				// UVs.  Note that Unreal UV origin (0,0) is top left
 				UV0s[UV0s.Num() - 1] = FVector2D(1.0f - (vMapPerAltitude * (i + 1)), 0.5f + (vMapPerLatitude * j));
@@ -336,7 +336,7 @@ void AProceduralMesh::BuildSphere(FVector center, float radius, int32 circleSect
 			}
 
 			// If we smooth normals, we need to recalculate normals
-			if (smoothNormals){
+			if (smoothNormals) {
 
 				// For the normal smooth we use the each vertex minus the center nomalized
 				normals[normals.Num() - 8] = (p3 - center).GetSafeNormal();
@@ -352,6 +352,65 @@ void AProceduralMesh::BuildSphere(FVector center, float radius, int32 circleSect
 	}
 }
 
+
+/** Subdivide the triangles for get more detail on geodesic sphere*/
+void AProceduralMesh::SubdivideTriangle(const FVector &v1, const FVector &v2, const FVector &v3, const unsigned int depth, FVector center, float radius, bool smoothNormals) {
+	
+	// If we are in the final loop, we have to draw the triangle
+	if (depth == 0) {
+
+		BuildTriangle(v1* radius + center, v2* radius + center, v3* radius + center);
+
+		// Apply smooth from the center of the sphere to the point
+		if (smoothNormals) {
+			normals[normals.Num() - 3] = (v1 * radius - center).GetSafeNormal();
+			normals[normals.Num() - 2] = (v2 * radius - center).GetSafeNormal();
+			normals[normals.Num() - 1] = (v3 * radius - center).GetSafeNormal();
+		}
+	}
+	else {
+
+		// Calculate new points for division
+		const FVector v12 = (v1 + v2).GetSafeNormal();
+		const FVector v23 = (v2 + v3).GetSafeNormal();
+		const FVector v31 = (v3 + v1).GetSafeNormal();
+
+		// Create the divisions
+		SubdivideTriangle(v1, v12, v31, depth - 1, center, radius, smoothNormals);
+		SubdivideTriangle(v2, v23, v12, depth - 1, center, radius, smoothNormals);
+		SubdivideTriangle(v3, v31, v23, depth - 1, center, radius, smoothNormals);
+		SubdivideTriangle(v12, v23, v31, depth - 1, center, radius, smoothNormals);
+	}
+
+}
+
+
+/** Generates a sphere from input values*/
+void AProceduralMesh::BuildGeodesicSphere(FVector center, float radius, const unsigned int depth, bool smoothNormals){
+	
+	// We build the icosa hardcoding the first loop of index and then dividing the triangles
+
+	// Constant values needed to easy calculate vectors
+	const float X = 0.525731112119133606;
+	const float Z = 0.850650808352039932;
+
+	// build first icosa
+	const FVector vdata[12] = {
+		{ -X, 0.0, Z },{ X, 0.0, Z },{ -X, 0.0, -Z },{ X, 0.0, -Z },
+		{ 0.0, Z, X },{ 0.0, Z, -X },{ 0.0, -Z, X },{ 0.0, -Z, -X },
+		{ Z, X, 0.0 },{ -Z, X, 0.0 },{ Z, -X, 0.0 },{ -Z, -X, 0.0 }
+	};
+	int tindices[20][3] = {
+		{ 0, 4, 1 },{ 0, 9, 4 },{ 9, 5, 4 },{ 4, 5, 8 },{ 4, 8, 1 },
+		{ 8, 10, 1 },{ 8, 3, 10 },{ 5, 3, 8 },{ 5, 2, 3 },{ 2, 7, 3 },
+		{ 7, 10, 3 },{ 7, 6, 10 },{ 7, 11, 6 },{ 11, 0, 6 },{ 0, 1, 6 },
+		{ 6, 1, 10 },{ 9, 0, 11 },{ 9, 11, 2 },{ 9, 2, 5 },{ 7, 2, 11 }
+	};
+
+	// Divide triangles
+	for (int i = 0; i < 20; i++)
+		SubdivideTriangle(vdata[tindices[i][0]], vdata[tindices[i][1]], vdata[tindices[i][2]], depth, center, radius, smoothNormals);
+}
 
 /** Generates a tube from input values*/
 void AProceduralMesh::BuildTubeFromOrientation(FVector startPoint, FVector endPoint, float radius, int32 circleSections, bool smoothNormals, bool useUniqueTexture, bool addStartCap, bool addEndCap) {
@@ -459,114 +518,4 @@ void AProceduralMesh::BuildTube(FVector startPoint, FVector endPoint, FVector st
 			UV0s[UV0s.Num() - 3] = FVector2D(0.5f - (FMath::Cos(angle) / 2.0f), 0.5f - (FMath::Sin(angle) / 2.0f));
 		}
 	}
-	
-	/*	
-	// Get prisma orientation and flip it to get its perpendicular
-	FVector orientation = (endPoint - startPoint).GetSafeNormal();
-
-	// Calculates angle between quads an UV0s for for each face
-	const float angleBetweenQuads = (2.0f / (float)(circleSections)) * PI;
-	const float vMapPerQuad = 1.0f / (float)circleSections;
-
-	// Store the init point and rotate it to use it later for caps
-	FVector pInitStart = FVector(FMath::Cos(0) * startRadius, FMath::Sin(0) * startRadius, 0.f) + startPoint;
-	FVector pInitEnd = FVector(FMath::Cos(0) * endRadius, FMath::Sin(0) * endRadius, 0.f) + endPoint;
-	pInitStart = UProceduralUtils::RotatePointAroundPivot(pInitStart, startPoint, startRotation.Rotation().Add(90.f, 0.f, 0.f).Euler());
-	pInitEnd = UProceduralUtils::RotatePointAroundPivot(pInitEnd, endPoint, endRotation.Rotation().Add(90.f, 0.f, 0.f).Euler());
-
-	// Create all the sides of the tube
-	for (int32 quadIndex = 0; quadIndex < circleSections; quadIndex++){
-
-		// Calculates desired angle and nextangle of every loop
-		float angle = (float)quadIndex * angleBetweenQuads;
-		float nextAngle = (float)(quadIndex + 1) * angleBetweenQuads;
-
-		// Set up the vertices
-		FVector p0 = (FVector(FMath::Cos(nextAngle) * endRadius, FMath::Sin(nextAngle) * endRadius, 0.f)) + endPoint;
-		FVector p1 = (FVector(FMath::Cos(angle) * endRadius, FMath::Sin(angle) * endRadius, 0.f)) + endPoint;
-		FVector p2 = (FVector(FMath::Cos(nextAngle) * startRadius, FMath::Sin(nextAngle) * startRadius, 0.f)) + startPoint;
-		FVector p3 = (FVector(FMath::Cos(angle) * startRadius, FMath::Sin(angle) * startRadius, 0.f)) + startPoint;
-
-		// We have the direction of the tube, for the faces we need to rotate it 90 degrees
-
-		FVector correction = FVector(90.f, 0.f, 0.f);
-
-		// Cause we allways rotate 90 degrees in X axis we need to correct it when orientation is bigger in Z axis
-		// If we aren't drawing a simple tube and its orientation is bigger in Z axis
-		if ((!comingFromSimpleTubeStart ) && FMath::Abs(orientation.Z) > FMath::Abs(orientation.Y) && FMath::Abs(orientation.Z) > FMath::Abs(orientation.X)) {
-			float angleCorrection = 45.f;
-			angleCorrection = 0.f;
-
-			// For up to down tube orientations
-			if (endPoint.Z > startPoint.Z) {
-				angle = FMath::RadiansToDegrees(acosf(FVector::DotProduct(startRotation, FVector::UpVector)));
-				correction = FVector(180.f, -180.f, 0);
-				correction.X -= ((45.f - angle) * 2);
-			}
-			// For down to up tube orientations
-			else if (endPoint.Z < startPoint.Z) {
-				angle = FMath::RadiansToDegrees(acosf(FVector::DotProduct(startRotation, -FVector::UpVector)));
-				correction = FVector(0.f, 180.f, 0.f);
-				correction.X += ((45.f - angle) * 2);
-			}
-		}
-
-		// Rotate all the vertices, we only apply correction to start point vertices
-		p0 = UProceduralUtils::RotatePointAroundPivot(p0, endPoint, (endRotation).Rotation().Add(90.f, 0.f, 0.f).Euler());
-		p1 = UProceduralUtils::RotatePointAroundPivot(p1, endPoint, (endRotation).Rotation().Add(90.f, 0.f, 0.f).Euler());
-		p2 = UProceduralUtils::RotatePointAroundPivot(p2, startPoint, (startRotation).Rotation().Add(correction.X, correction.Y, correction.Z).Euler());
-		p3 = UProceduralUtils::RotatePointAroundPivot(p3, startPoint, (startRotation).Rotation().Add(correction.X, correction.Y, correction.Z).Euler());
-		
-		// Generate the quad
-		BuildQuad(p0, p1, p3, p2);
-
-		// If we use a unique texture, we need to recalculate the UVs using vMapPerQuad
-		if (useUniqueTexture){
-
-			// UVs.  Note that Unreal UV origin (0,0) is top left
-			UV0s[UV0s.Num() - 2] = FVector2D((vMapPerQuad * quadIndex), 1.0f);
-			UV0s[UV0s.Num() - 1] = FVector2D((vMapPerQuad * (quadIndex + 1)), 1.0f);
-			UV0s[UV0s.Num() - 4] = FVector2D((vMapPerQuad * (quadIndex + 1)), 0.0f);
-			UV0s[UV0s.Num() - 3] = FVector2D((vMapPerQuad * quadIndex), 0.0f);
-		}
-
-		// If we smooth normals, we need to recalculate the normals
-		if (smoothNormals){
-
-			// As the vertices are rotated, will take into account the rotation
-			// For the start normal smooth we use the each vertex minus the startPoint nomalized
-			// For the end normal smooth we use the each vertex minus the endPoint nomalized
-			normals[normals.Num() - 4] = (p0 - endPoint).GetSafeNormal();
-			normals[normals.Num() - 3] = (p1 - endPoint).GetSafeNormal();
-			normals[normals.Num() - 2] = (p3 - startPoint).GetSafeNormal();
-			normals[normals.Num() - 1] = (p2 - startPoint).GetSafeNormal();
-		}
-
-
-		
-		// Caps are closed here by triangles that start at 0, then use the points along the circle for the other two corners.
-		// A better looking method uses a vertex in the center of the circle, but uses two more polygons.  We will demonstrate that in a different sample.
-		if (quadIndex != 0 && addStartCap) {
-
-			// Generate the triangles
-			BuildTriangle(pInitStart, p2, p3);
-
-			// Recalculate the UVS to use an unique texture
-			UV0s[UV0s.Num() - 3] = FVector2D(0.5f - (FMath::Cos(0) / 2.0f), 0.5f - (FMath::Sin(0) / 2.0f));
-			UV0s[UV0s.Num() - 2] = FVector2D(0.5f - (FMath::Cos(-nextAngle) / 2.0f), 0.5f - (FMath::Sin(-nextAngle) / 2.0f));
-			UV0s[UV0s.Num() - 1] = FVector2D(0.5f - (FMath::Cos(-angle) / 2.0f), 0.5f - (FMath::Sin(-angle) / 2.0f));
-		}		
-		
-		if (quadIndex != 0 && addEndCap) {
-
-			// Generate the triangles
-			BuildTriangle(p1, p0, pInitEnd);
-
-			// Recalculate the UVS to use an unique texture
-			UV0s[UV0s.Num() - 1] = FVector2D(0.5f - (FMath::Cos(0) / 2.0f), 0.5f - (FMath::Sin(0) / 2.0f));
-			UV0s[UV0s.Num() - 2] = FVector2D(0.5f - (FMath::Cos(-nextAngle) / 2.0f), 0.5f - (FMath::Sin(-nextAngle) / 2.0f));
-			UV0s[UV0s.Num() - 3] = FVector2D(0.5f - (FMath::Cos(-angle) / 2.0f), 0.5f - (FMath::Sin(-angle) / 2.0f));
-		}
-	}
-	*/
 }

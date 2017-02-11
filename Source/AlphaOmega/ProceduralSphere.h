@@ -18,6 +18,10 @@ class ALPHAOMEGA_API AProceduralSphere : public AProceduralMesh
 
 public:
 
+	/** Use geodesic method to build the sphere*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
+		bool bGeodesic;
+
 	/** Allocates the center point of the sphere*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
 		FVector center;
@@ -26,21 +30,21 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
 		float radius;
 
+	/** Indicates the depth of diviosions of the triangles of the sphere*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters", meta = (EditCondition = "bGeodesic"))
+		int32 depth;
+
 	/** Allocates the number of horizontal faces of the sphere*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters", meta = (EditCondition = "!bGeodesic"))
 		int32 circleSections;
 
 	/** Allocates the number of vertical faces of the sphere*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters", meta = (EditCondition = "!bGeodesic"))
 		int32 heightSections;
 
 	/** Handles if the figure will be smoothed*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
 		bool smoothNormals;
-
-	/** Handles if its use an unique texture*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
-		bool invertedSmoothNormals;
 
 	/** Handles if its draw a bottom cap*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
