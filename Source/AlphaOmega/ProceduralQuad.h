@@ -19,22 +19,8 @@ class ALPHAOMEGA_API AProceduralQuad : public AProceduralMesh
 
 public:
 
-	/** Allocates bottom left vertex of the quad*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
-		FVector bottomLeft;
-
-	/** Allocates bottom right vertex of the quad*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
-		FVector bottomRight;
-
-	/** Allocates top right vertex of the quad*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
-		FVector topRight;
-
-	/** Allocates top left vertex of the quad*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
-		FVector topLeft;
-	
-	
+	/** Allocates the points of the tube strip*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters", meta = (MakeEditWidget))
+		TArray<FTransform> verticesLocation;	
 	
 };
