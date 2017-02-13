@@ -13,7 +13,7 @@ class ALPHAOMEGA_API AProceduralSphere : public AProceduralMesh
 {
 	GENERATED_BODY()
 
-	/** Sets up the values to generate the desired figure*/
+	/** Sets up the values to generate the sphere*/
 	virtual void GenerateMesh();
 
 public:

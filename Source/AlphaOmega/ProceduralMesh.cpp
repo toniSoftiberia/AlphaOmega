@@ -3,6 +3,7 @@
 #include "AlphaOmega.h"
 #include "ProceduralMesh.h"
 #include "ProceduralUtils.h"
+#include "ProceduralLandscape.h"
 
 
 #if WITH_EDITOR  
@@ -48,9 +49,13 @@ void AProceduralMesh::OnConstruction(const FTransform& Transform)
 	mesh->ClearAllMeshSections();
 	mesh->ClearAllCachedCookedPlatformData();
 
-	mesh->CreateMeshSection(0, vertices, triangles, normals, UV0s, TArray<FColor>(), tangents, false);
+	// only create mesh if there is something to create
+	if (vertices.Num() > 2) {
 
-	mesh->SetMaterial(0, material);
+		mesh->CreateMeshSection(0, vertices, triangles, normals, UV0s, TArray<FColor>(), tangents, false);
+
+		mesh->SetMaterial(0, material);
+	}
 }
 #endif
 
@@ -194,27 +199,21 @@ void AProceduralMesh::BuildCube(FVector cubeSize){
 	FVector p7 = FVector(-offsetX, offsetY, offsetZ);
 
 	// Front (+X) face: 0-1-2-3
-	FVector normal = FVector::ForwardVector;
 	BuildQuad(p0, p1, p2, p3);
 
 	// Back (-X) face: 5-4-7-6
-	normal = -FVector::ForwardVector;
 	BuildQuad(p5, p4, p7, p6);
 
 	// Left (-Y) face: 1-5-6-2
-	normal = -FVector::RightVector;
 	BuildQuad(p1, p5, p6, p2);
 
 	// Right (+Y) face: 4-0-3-7
-	normal = FVector::RightVector;
 	BuildQuad(p4, p0, p3, p7);
 
 	// Top (+Z) face: 6-7-3-2
-	normal = FVector::UpVector;
 	BuildQuad(p6, p7, p3, p2);
 
 	// Bottom (-Z) face: 1-0-4-5
-	normal = -FVector::UpVector;
 	BuildQuad(p1, p0, p4, p5);
 }
 
@@ -516,6 +515,60 @@ void AProceduralMesh::BuildTube(FVector startPoint, FVector endPoint, FVector st
 			UV0s[UV0s.Num() - 2] = FVector2D(0.5f - (FMath::Cos(0) / 2.0f), 0.5f - (FMath::Sin(0) / 2.0f));
 			UV0s[UV0s.Num() - 1] = FVector2D(0.5f - (FMath::Cos(nextAngle) / 2.0f), 0.5f - (FMath::Sin(nextAngle) / 2.0f));
 			UV0s[UV0s.Num() - 3] = FVector2D(0.5f - (FMath::Cos(angle) / 2.0f), 0.5f - (FMath::Sin(angle) / 2.0f));
+		}
+	}
+}
+
+
+/** Generates a landscape from input values*/
+void AProceduralMesh::BuildLandscape(float sizeX, float sizeY, int32 widthSections, int32 lenghtSections, TArray<float> heightValues, bool smoothNormals, bool useUniqueTexture) {
+	
+	// Skip 0 division
+	if (widthSections > 0 && lenghtSections > 0) {
+
+		// Define the size of the steps in each quad
+		float widthStep = sizeX / widthSections;
+		float heigthStep = sizeY / lenghtSections;
+		float UVwidthStep = (float)1 / widthSections;
+		float UVheigthStep = (float)1 / lenghtSections;
+
+		// Doble loop to generate the quads
+		for (int i = 0; i < lenghtSections; ++i) {
+
+			for (int j = 0; j < widthSections; ++j) {
+
+				// Divide the mesh in sections using widthStep & heigthStep
+
+				int32 heightIndex = (i*(lenghtSections + 1)) + (j);
+
+				FVector p0 = FVector(heigthStep * i - (sizeY / 2), widthStep * j - (sizeX / 2), heightValues[heightIndex]);
+				FVector p1 = FVector(heigthStep * i - (sizeY / 2), widthStep * (j + 1) - (sizeX / 2), heightValues[heightIndex + 1]);
+				FVector p2 = FVector(heigthStep * (i + 1) - (sizeY / 2), widthStep * (j + 1) - (sizeX / 2), heightValues[heightIndex + lenghtSections + 2]);
+				FVector p3 = FVector(heigthStep * (i + 1) - (sizeY / 2), widthStep * j - (sizeX / 2), heightValues[heightIndex + lenghtSections + 1]);
+
+				BuildQuad(p0, p1, p2, p3);
+
+				// If we use a unique texture, we need to recalculate the UVs using UVwidthStep & UVheigthStep
+				if (useUniqueTexture) {
+
+					// UVs.  Note that Unreal UV origin (0,0) is top left
+					UV0s[UV0s.Num() - 1] = FVector2D(UVwidthStep * (  j ), 1 - (UVheigthStep * ( i + 1)));
+					UV0s[UV0s.Num() - 2] = FVector2D(UVwidthStep * ((  j + 1) ), 1 - (UVheigthStep * ( i + 1)));
+					UV0s[UV0s.Num() - 3] = FVector2D(UVwidthStep * ((j + 1) ), 1 - (UVheigthStep *(  (i ))));
+					UV0s[UV0s.Num() - 4] = FVector2D(UVwidthStep * ( j), 1 - (UVheigthStep * ( (i ))));
+				}
+
+				// If we smooth normals, we need to recalculate the normals
+				if (smoothNormals) {
+
+					// For smooth we use an average of all the closer vertex
+					normals[normals.Num() - 4] = ((AProceduralLandscape*)this)->GetSmoothFromIndex(i, j);
+					normals[normals.Num() - 3] = ((AProceduralLandscape*)this)->GetSmoothFromIndex(i, j + 1);
+					normals[normals.Num() - 2] = ((AProceduralLandscape*)this)->GetSmoothFromIndex(i + 1, j + 1);
+					normals[normals.Num() - 1] = ((AProceduralLandscape*)this)->GetSmoothFromIndex(i + 1, j + 1);
+				}
+			}
+
 		}
 	}
 }

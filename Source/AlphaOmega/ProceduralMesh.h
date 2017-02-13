@@ -15,13 +15,6 @@ class ALPHAOMEGA_API AProceduralMesh : public AActor
 {
 	GENERATED_BODY()
 
-	/** Generates a tube from input values*/
-	void BuildTube(FVector startPoint, FVector endPoint, FVector startRotation, FVector endRotation, float startRadius, float endRadius, int32 circleSections, bool smoothNormals, bool useUniqueTexture, bool addStartCap, bool addEndCap);
-
-	/** Subdivide the triangles for get more detail on geodesic sphere*/
-	void SubdivideTriangle(const FVector &v1, const FVector &v2, const FVector &v3, const unsigned int depth, FVector center, float radius, bool smoothNormals);
-
-
 protected:
 
 	// Called when the game starts or when spawned
@@ -98,8 +91,20 @@ public:
 	/** Generates a tube from input values*/
 	void BuildTubeFromRotations(FVector startPoint, FVector endPoint, FVector startRotation, FVector endRotation, float startRadius, float endRadius, int32 circleSections, bool smoothNormals, bool useUniqueTexture, bool addStartCap, bool addEndCap);
 
+	/** Generates a landscape from input values*/
+	void BuildLandscape(float sizeX, float sizeY, int32 widthSections, int32 lengthSections, TArray<float> heightValues, bool smoothNormals, bool useUniqueTexture);
+
 	/** The material to use in this mesh*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
 		UMaterialInterface* material;
+
+private:
+
+
+	/** Generates a tube from input values*/
+	void BuildTube(FVector startPoint, FVector endPoint, FVector startRotation, FVector endRotation, float startRadius, float endRadius, int32 circleSections, bool smoothNormals, bool useUniqueTexture, bool addStartCap, bool addEndCap);
+
+	/** Subdivide the triangles for get more detail on geodesic sphere*/
+	void SubdivideTriangle(const FVector &v1, const FVector &v2, const FVector &v3, const unsigned int depth, FVector center, float radius, bool smoothNormals);
 
 };

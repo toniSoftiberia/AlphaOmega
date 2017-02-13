@@ -4,7 +4,7 @@
 #include "ProceduralSphere.h"
 
 
-/** Sets up the values to generate the desired figure*/
+/** Sets up the values to generate the sphere*/
 void AProceduralSphere::GenerateMesh() {
 
 	// We only need to call the desired method to build a sphere

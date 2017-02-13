@@ -59,7 +59,8 @@ class ALPHAOMEGA_API UProceduralUtils : public UObject
 	
 public:
 
-	static FVector UProceduralUtils::RotatePointAroundPivot(FVector inPoint, FVector inPivot, FVector inAngles);
+	static FVector RotatePointAroundPivot(FVector inPoint, FVector inPivot, FVector inAngles);
+
 	
 	
 };
