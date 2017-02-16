@@ -533,18 +533,15 @@ void AProceduralMesh::BuildLandscape(float sizeX, float sizeY, int32 widthSectio
 		float UVlengthStep = (float)1 / lenghtSections;
 
 		// Doble loop to generate the quads
+				// Divide the mesh in sections using widthStep & lengthStep
 		for (int i = 0; i < widthSections; ++i) {
-
 			for (int j = 0; j < lenghtSections; ++j) {
 
-				// Divide the mesh in sections using widthStep & lengthStep
-
-				int32 heightIndex = (i*(lenghtSections + 1)) + (j);
-
-				FVector p0 = FVector(lengthStep * i - (sizeY / 2), widthStep * j - (sizeX / 2), heightValues[i][j]);
-				FVector p1 = FVector(lengthStep * i - (sizeY / 2), widthStep * (j + 1) - (sizeX / 2), heightValues[i][j + 1]);
-				FVector p2 = FVector(lengthStep * (i + 1) - (sizeY / 2), widthStep * (j + 1) - (sizeX / 2), heightValues[i + 1][j + 1]);
-				FVector p3 = FVector(lengthStep * (i + 1) - (sizeY / 2), widthStep * j - (sizeX / 2), heightValues[i + 1][j]);
+				// Generates the vertives with the precalculated heightValues
+				FVector p0 = FVector(widthStep * i - (sizeX / 2), lengthStep * j - (sizeY / 2), heightValues[i][j]);
+				FVector p1 = FVector(widthStep * i - (sizeX / 2), lengthStep * (j + 1) - (sizeY / 2), heightValues[i][j + 1]);
+				FVector p2 = FVector(widthStep * (i + 1) - (sizeX / 2), lengthStep * (j + 1) - (sizeY / 2), heightValues[i + 1][j + 1]);
+				FVector p3 = FVector(widthStep * (i + 1) - (sizeX / 2), lengthStep * j - (sizeY / 2), heightValues[i + 1][j]);
 
 				BuildQuad(p0, p1, p2, p3);
 
@@ -552,20 +549,22 @@ void AProceduralMesh::BuildLandscape(float sizeX, float sizeY, int32 widthSectio
 				if (useUniqueTexture) {
 
 					// UVs.  Note that Unreal UV origin (0,0) is top left
-					UV0s[UV0s.Num() - 1] = FVector2D(UVwidthStep * (  j ), 1 - (UVlengthStep * ( i + 1)));
-					UV0s[UV0s.Num() - 2] = FVector2D(UVwidthStep * ((  j + 1) ), 1 - (UVlengthStep * ( i + 1)));
-					UV0s[UV0s.Num() - 3] = FVector2D(UVwidthStep * ((j + 1) ), 1 - (UVlengthStep *(  (i ))));
-					UV0s[UV0s.Num() - 4] = FVector2D(UVwidthStep * ( j), 1 - (UVlengthStep * ( (i ))));
+					// Becarefull X and Y are inverted respect of the mesh representation
+					UV0s[UV0s.Num() - 1] = FVector2D(UVlengthStep * (j), 1 - (UVwidthStep * (i + 1)));
+					UV0s[UV0s.Num() - 2] = FVector2D(UVlengthStep * ((j + 1)), 1 - (UVwidthStep * (i + 1)));
+					UV0s[UV0s.Num() - 3] = FVector2D(UVlengthStep * ((j + 1)), 1 - (UVwidthStep *((i))));
+					UV0s[UV0s.Num() - 4] = FVector2D(UVlengthStep * (j), 1 - (UVwidthStep * ((i))));
 				}
 
 				// If we smooth normals, we need to recalculate the normals
 				if (smoothNormals) {
 
 					// For smooth we use an average of all the closer vertex
+					// We have a method for get the precalculated smooth
 					normals[normals.Num() - 4] = ((AProceduralLandscape*)this)->GetSmoothFromIndex(i, j);
 					normals[normals.Num() - 3] = ((AProceduralLandscape*)this)->GetSmoothFromIndex(i, j + 1);
 					normals[normals.Num() - 2] = ((AProceduralLandscape*)this)->GetSmoothFromIndex(i + 1, j + 1);
-					normals[normals.Num() - 1] = ((AProceduralLandscape*)this)->GetSmoothFromIndex(i + 1, j + 1);
+					normals[normals.Num() - 1] = ((AProceduralLandscape*)this)->GetSmoothFromIndex(i + 1, j);
 				}
 			}
 

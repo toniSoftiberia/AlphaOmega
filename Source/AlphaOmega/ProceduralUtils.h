@@ -54,8 +54,8 @@ USTRUCT()
 struct FFloatArray
 {
 	GENERATED_USTRUCT_BODY()
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Procedural Parameters")
+
+		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Procedural Parameters")
 		TArray<float> childs;
 
 	float& operator [](int idx) {
@@ -63,6 +63,26 @@ struct FFloatArray
 	}
 
 	float operator [](int idx) const {
+		return childs[idx];
+	}
+};
+
+/**
+* Two dimensional array of FVector
+*/
+USTRUCT()
+struct FVectorArray
+{
+	GENERATED_USTRUCT_BODY()
+
+		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Procedural Parameters")
+		TArray<FVector> childs;
+
+	FVector& operator [](int idx) {
+		return childs[idx];
+	}
+
+	FVector operator [](int idx) const {
 		return childs[idx];
 	}
 };

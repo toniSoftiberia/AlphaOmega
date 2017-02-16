@@ -57,7 +57,17 @@ private:
 	/** Generates the height for the mesh using randomSeed*/
 	void GenerateSmoothTerrain(int smoothStep);
 
+	/** Generates the normal vale smoothed for each vertex based on generated heights*/
+	void PrecalculateSmoothNormals();
+
+	/** With the heigth generated we need to calculate the blank positions with interpolation*/
+	void InterpolateTerrain(int smoothStep);
+
 	/** Allocates the number width sections*/
 	UPROPERTY()
 		TArray<FFloatArray> heightValues;
+
+	/** Allocates the number width sections*/
+	UPROPERTY()
+		TArray<FVectorArray> smoothValues;
 };

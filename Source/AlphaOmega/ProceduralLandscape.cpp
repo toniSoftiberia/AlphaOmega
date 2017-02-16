@@ -26,10 +26,10 @@ void AProceduralLandscape::GenerateMesh() {
 
 
 /** Generates the height for the mesh using randomSeed*/
-void AProceduralLandscape::GenerateHeights(int smoothStep){
+void AProceduralLandscape::GenerateHeights(int smoothStep) {
 
 	FRandomStream RngStream = FRandomStream::FRandomStream(randomSeed);
-	int32 i,j;
+	int32 i, j;
 
 	// Fill height data with random values
 	for (i = 0; i <= widthSections;) {
@@ -47,106 +47,116 @@ void AProceduralLandscape::GenerateHeights(int smoothStep){
 }
 
 
-/** Generates the height for the mesh using randomSeed*/
-void AProceduralLandscape::GenerateSmoothTerrain(int smoothStep){
-	
-	GenerateHeights(smoothStep);
 
-	int32 i, j;
-	int32 localSmoothStepJ = smoothStep;
+/** Generates the normal vale smoothed for each vertex based on generated heights*/
+void AProceduralLandscape::PrecalculateSmoothNormals() {
 
-	for (i = 0; i < widthSections + 1;i++) {
-		UE_LOG(LogClass, Log, TEXT("i < widthSections + 1 -> %d < %d + 1 = %d"), i, widthSections, i < widthSections + 1);
-		for (j = 0; j < lenghtSections + 1;j++) {
-			UE_LOG(LogClass, Log, TEXT("j < lenghtSections + 1 -> %d < %d + 1 = %d"), j, lenghtSections, j < lenghtSections + 1);
-			localSmoothStepJ = smoothStep;
+	// Clean the values
+	smoothValues.Empty();
+	smoothValues.AddDefaulted(widthSections + 1);
+	for (int k = 0; k < widthSections + 1; ++k)
+		smoothValues[k].childs.AddDefaulted(lenghtSections + 1);
 
-			UE_LOG(LogClass, Log, TEXT("j %d"), j);
-			UE_LOG(LogClass, Log, TEXT("i %d"), i);
+	// This vales will be used several times
+	float widthStep = size.X / widthSections;
+	float lengthStep = size.Y / lenghtSections;
+
+	// Fill height data with random values
+	for (int32 i = 0; i <= widthSections; ++i) {
+		for (int32 j = 0; j <= lenghtSections; ++j) {
+
+			// We use the top vertex for the first and we rotate clockwise
+			// By default we use the vector direction for distance between vertex
+			FVector v0 = FVector::ForwardVector * widthStep;
+			if (i < widthSections)
+				v0 = FVector(widthStep, 0, heightValues[i + 1][j]);
+
+			FVector v1 = FVector::RightVector * lengthStep;
+			if (j < lenghtSections)
+				v1 = FVector(0, lengthStep, heightValues[i][j + 1]);
+
+			FVector v2 = -FVector::ForwardVector * widthStep;
+			if (i > 0)
+				v2 = FVector(-widthStep, 0, heightValues[i - 1][j]);
+
+			FVector v3 = -FVector::RightVector * lengthStep;
+			if (j > 0)
+				v3 = FVector(0, -lengthStep, heightValues[i][j - 1]);
+
+			// Calculate the new normals
+			FVector n0 = FVector::CrossProduct(v0, v1).GetSafeNormal();
+			FVector n1 = FVector::CrossProduct(v1, v2).GetSafeNormal();
+			FVector n2 = FVector::CrossProduct(v2, v3).GetSafeNormal();
+			FVector n3 = FVector::CrossProduct(v3, v0).GetSafeNormal();
+
+			smoothValues[i][j] = (n0 + n1 + n2 + n3) / 4;
+		}
+	}
+}
+
+/** With the heigth generated we need to calculate the blank positions with interpolation*/
+void AProceduralLandscape::InterpolateTerrain(int smoothStep) {
+
+	// Loop all terrain interpolating values
+	for (int32 i = 0; i < widthSections + 1; i++) {
+		for (int32 j = 0; j < lenghtSections + 1; j++) {
+
+			// We need use diferent value of smooth step when we are in last positions, but we fill by default with smooth step
+			int32 localSmoothStep = smoothStep;
+			// First index to interpolate
 			int32 backIndex = (j / smoothStep) * smoothStep;
-
-			while (backIndex + localSmoothStepJ > lenghtSections) {
-				--localSmoothStepJ;
-			}
-			UE_LOG(LogClass, Log, TEXT("localSmoothStepJ %d"), localSmoothStepJ);
-						
-				int32 localSmoothStepI = smoothStep;
-						
-				while (i + localSmoothStepI > widthSections) {
-					--localSmoothStepI;
-				}
-			UE_LOG(LogClass, Log, TEXT("j backIndex %d"), backIndex);
-
-			int32 nextIndex = ((j / smoothStep) * (smoothStep)) + localSmoothStepJ;
-			UE_LOG(LogClass, Log, TEXT("j nextIndex %d"), nextIndex);
-
+			
+			// If we are in last postions and length sections isn't multiple of smoothStep we need to reevaluate it
+			while (backIndex + localSmoothStep > lenghtSections)
+				--localSmoothStep;
+			
+			// Second index to interpolate
+			int32 nextIndex = backIndex + localSmoothStep;
+			// Position between next and back
 			float interpolationPosition = (float)(j % smoothStep) / smoothStep;
-			UE_LOG(LogClass, Log, TEXT("interpolationPosition %f"), interpolationPosition);	
 
-			float interpolatedValue = FMath::Lerp(heightValues[i][backIndex], heightValues[i][nextIndex], interpolationPosition);
-			UE_LOG(LogClass, Log, TEXT("interpolatedValue %f"), interpolatedValue);
+			// Assing the interpolated value to the array
+			heightValues[i][j] = FMath::Lerp(heightValues[i][backIndex], heightValues[i][nextIndex], interpolationPosition);
 
-			heightValues[i][j] = interpolatedValue;
-			UE_LOG(LogClass, Log, TEXT("heightValues[%d][%d] %f"), i, j, heightValues[i][j]);
-
-
+			// If we are in a node we need to interpolate in X direction to
 			if ((i % smoothStep == 0) && (j % smoothStep == 0)) {
 
+				// We need use diferent value of smooth step when we are in last positions, but we fill by default with smooth step
+				localSmoothStep = smoothStep;
+				// If we are in last postions and length sections isn't multiple of smoothStep we need to reevaluate it
+				while (i + localSmoothStep > widthSections)
+					--localSmoothStep;
+				
+				// Loop in X direction
+				for (int k = 1; k <= localSmoothStep; k++) {
 
-				for (int k = 1; k < localSmoothStepI; k++) {
+					// Position between next and back, note that we allways use smoothStep here for better smoothing, if we use localSmoothStep it will go to 0 faster
+					interpolationPosition = (float)k / smoothStep;
 
-						
-						UE_LOG(LogClass, Log, TEXT("i localSmoothStep %d"), localSmoothStepI);
-						UE_LOG(LogClass, Log, TEXT("i backIndex %d"), i);
-						UE_LOG(LogClass, Log, TEXT("i nextIndex %d"), i + localSmoothStepI);
-
-						float interpolationPosition = (float)k / localSmoothStepI;
-
-						UE_LOG(LogClass, Log, TEXT("i interpolationPosition %f"), interpolationPosition);
-						if (localSmoothStepI == 0)
-							localSmoothStepI = 1.f;
-
-						interpolatedValue = FMath::Lerp(heightValues[i][j], heightValues[i+ localSmoothStepI][j], interpolationPosition);
-						
-						UE_LOG(LogClass, Log, TEXT("interpolatedValue %f"), interpolatedValue);
-
-						heightValues[i + k -(smoothStep - localSmoothStepI)][j] = interpolatedValue;
-
-						UE_LOG(LogClass, Log, TEXT("heightValues[%d][%d] %f"), i + k - (smoothStep - localSmoothStepI), j, heightValues[i + k - (smoothStep - localSmoothStepI)][j]);
-			
-								
+					// Assing the interpolated value to the array
+					heightValues[i + k][j] = FMath::Lerp(heightValues[i][j], heightValues[i + localSmoothStep][j], interpolationPosition);
 				}
 			}
 		}
 	}
 }
 
+/** Generates the height for the mesh using randomSeed*/
+void AProceduralLandscape::GenerateSmoothTerrain(int smoothStep){
+	
+	// Generate the deired heights 
+	GenerateHeights(smoothStep);
+
+	// Interpolate the values of the calculated heights 
+	InterpolateTerrain(smoothStep);
+
+	// If required pprecalcule normals
+	if (smoothNormals)
+		PrecalculateSmoothNormals();
+}
+
 FVector AProceduralLandscape::GetSmoothFromIndex(int32 i, int32 j) {
-	
-	// We use the top vertex for the first and we rotate clockwise
-	// By default we use the vector direction for distance between vertex
-	FVector v0 = FVector::ForwardVector * size.X / widthSections;
-	if (i < widthSections)
-		v0 = FVector(size.X / widthSections, 0, heightValues[i + 1][j]);
-	
-	FVector v1 = FVector::RightVector * size.Y / lenghtSections;
-	if (j < lenghtSections)
-		v1 = FVector(0 ,size.Y / lenghtSections, heightValues[i][j + 1]);
-	
-	FVector v2 = -FVector::ForwardVector * size.X / widthSections;
-	if (i > 0) 
-		v2 = FVector(-size.X / widthSections, 0, heightValues[i - 1][j]);
-	
-	FVector v3 = -FVector::RightVector * size.Y / lenghtSections;
-	if (j > 0) 
-		v3 = FVector(0, -size.Y / lenghtSections, heightValues[i][j - 1]);
 
-	// Calculate the new normals
-	FVector n0 = FVector::CrossProduct(v0, v1).GetSafeNormal();
-	FVector n1 = FVector::CrossProduct(v1, v2).GetSafeNormal();
-	FVector n2 = FVector::CrossProduct(v2, v3).GetSafeNormal();
-	FVector n3 = FVector::CrossProduct(v3, v0).GetSafeNormal();
-
-	return (n0 + n1 + n2 + n3) / 4;
+	return smoothValues[i][j];
  }
 
