@@ -92,7 +92,7 @@ public:
 	void BuildTubeFromRotations(FVector startPoint, FVector endPoint, FVector startRotation, FVector endRotation, float startRadius, float endRadius, int32 circleSections, bool smoothNormals, bool useUniqueTexture, bool addStartCap, bool addEndCap);
 
 	/** Generates a landscape from input values*/
-	void BuildLandscape(float sizeX, float sizeY, int32 widthSections, int32 lengthSections, TArray<float> heightValues, bool smoothNormals, bool useUniqueTexture);
+	void BuildLandscape(float sizeX, float sizeY, int32 widthSections, int32 lengthSections, TArray<FFloatArray> heightValues, bool smoothNormals, bool useUniqueTexture);
 
 	/** The material to use in this mesh*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")

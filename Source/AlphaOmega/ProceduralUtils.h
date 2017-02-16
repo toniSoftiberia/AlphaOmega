@@ -31,8 +31,7 @@ struct FProceduralVertex
 		FProcMeshTangent tangent;
 
 	/** Overloaded constructor*/
-	FProceduralVertex(const FVector& newPosition, const FVector2D& newUV0, const FVector& newNormal, const FProcMeshTangent& newTangent)
-	{
+	FProceduralVertex(const FVector& newPosition, const FVector2D& newUV0, const FVector& newNormal, const FProcMeshTangent& newTangent){
 		position = newPosition;
 		UV0 = newUV0;
 		normal = newNormal;
@@ -40,14 +39,34 @@ struct FProceduralVertex
 	}
 
 	/** base constructor*/
-	FProceduralVertex()
-	{
+	FProceduralVertex(){
 		position = FVector::ZeroVector;
 		UV0 = FVector2D::ZeroVector;
 		normal = FVector::ZeroVector;
 		tangent = FProcMeshTangent(0.f, 0.f, 0.f);
 	}
 };
+
+/**
+* Two dimensional array of floats
+*/
+USTRUCT()
+struct FFloatArray
+{
+	GENERATED_USTRUCT_BODY()
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Procedural Parameters")
+		TArray<float> childs;
+
+	float& operator [](int idx) {
+		return childs[idx];
+	}
+
+	float operator [](int idx) const {
+		return childs[idx];
+	}
+};
+
 
 /**
  * Here we allocate the static common functions for the project

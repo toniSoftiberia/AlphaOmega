@@ -521,41 +521,41 @@ void AProceduralMesh::BuildTube(FVector startPoint, FVector endPoint, FVector st
 
 
 /** Generates a landscape from input values*/
-void AProceduralMesh::BuildLandscape(float sizeX, float sizeY, int32 widthSections, int32 lenghtSections, TArray<float> heightValues, bool smoothNormals, bool useUniqueTexture) {
+void AProceduralMesh::BuildLandscape(float sizeX, float sizeY, int32 widthSections, int32 lenghtSections, TArray<FFloatArray> heightValues, bool smoothNormals, bool useUniqueTexture) {
 	
 	// Skip 0 division
 	if (widthSections > 0 && lenghtSections > 0) {
 
 		// Define the size of the steps in each quad
 		float widthStep = sizeX / widthSections;
-		float heigthStep = sizeY / lenghtSections;
+		float lengthStep = sizeY / lenghtSections;
 		float UVwidthStep = (float)1 / widthSections;
-		float UVheigthStep = (float)1 / lenghtSections;
+		float UVlengthStep = (float)1 / lenghtSections;
 
 		// Doble loop to generate the quads
-		for (int i = 0; i < lenghtSections; ++i) {
+		for (int i = 0; i < widthSections; ++i) {
 
-			for (int j = 0; j < widthSections; ++j) {
+			for (int j = 0; j < lenghtSections; ++j) {
 
-				// Divide the mesh in sections using widthStep & heigthStep
+				// Divide the mesh in sections using widthStep & lengthStep
 
 				int32 heightIndex = (i*(lenghtSections + 1)) + (j);
 
-				FVector p0 = FVector(heigthStep * i - (sizeY / 2), widthStep * j - (sizeX / 2), heightValues[heightIndex]);
-				FVector p1 = FVector(heigthStep * i - (sizeY / 2), widthStep * (j + 1) - (sizeX / 2), heightValues[heightIndex + 1]);
-				FVector p2 = FVector(heigthStep * (i + 1) - (sizeY / 2), widthStep * (j + 1) - (sizeX / 2), heightValues[heightIndex + lenghtSections + 2]);
-				FVector p3 = FVector(heigthStep * (i + 1) - (sizeY / 2), widthStep * j - (sizeX / 2), heightValues[heightIndex + lenghtSections + 1]);
+				FVector p0 = FVector(lengthStep * i - (sizeY / 2), widthStep * j - (sizeX / 2), heightValues[i][j]);
+				FVector p1 = FVector(lengthStep * i - (sizeY / 2), widthStep * (j + 1) - (sizeX / 2), heightValues[i][j + 1]);
+				FVector p2 = FVector(lengthStep * (i + 1) - (sizeY / 2), widthStep * (j + 1) - (sizeX / 2), heightValues[i + 1][j + 1]);
+				FVector p3 = FVector(lengthStep * (i + 1) - (sizeY / 2), widthStep * j - (sizeX / 2), heightValues[i + 1][j]);
 
 				BuildQuad(p0, p1, p2, p3);
 
-				// If we use a unique texture, we need to recalculate the UVs using UVwidthStep & UVheigthStep
+				// If we use a unique texture, we need to recalculate the UVs using UVwidthStep & UVlengthStep
 				if (useUniqueTexture) {
 
 					// UVs.  Note that Unreal UV origin (0,0) is top left
-					UV0s[UV0s.Num() - 1] = FVector2D(UVwidthStep * (  j ), 1 - (UVheigthStep * ( i + 1)));
-					UV0s[UV0s.Num() - 2] = FVector2D(UVwidthStep * ((  j + 1) ), 1 - (UVheigthStep * ( i + 1)));
-					UV0s[UV0s.Num() - 3] = FVector2D(UVwidthStep * ((j + 1) ), 1 - (UVheigthStep *(  (i ))));
-					UV0s[UV0s.Num() - 4] = FVector2D(UVwidthStep * ( j), 1 - (UVheigthStep * ( (i ))));
+					UV0s[UV0s.Num() - 1] = FVector2D(UVwidthStep * (  j ), 1 - (UVlengthStep * ( i + 1)));
+					UV0s[UV0s.Num() - 2] = FVector2D(UVwidthStep * ((  j + 1) ), 1 - (UVlengthStep * ( i + 1)));
+					UV0s[UV0s.Num() - 3] = FVector2D(UVwidthStep * ((j + 1) ), 1 - (UVlengthStep *(  (i ))));
+					UV0s[UV0s.Num() - 4] = FVector2D(UVwidthStep * ( j), 1 - (UVlengthStep * ( (i ))));
 				}
 
 				// If we smooth normals, we need to recalculate the normals

@@ -42,15 +42,22 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
 		bool useUniqueTexture;
 
+	/** Handles the size of the smooth step*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
+		int smoothStep = 1;
+
 	/** Returns the smooth value of desired index*/
 		FVector GetSmoothFromIndex(int32 i, int32 j);
 
 private:
 
 	/** Generates the height for the mesh using randomSeed*/
-	void GenerateHeights();
+	void GenerateHeights(int smoothStep);
+
+	/** Generates the height for the mesh using randomSeed*/
+	void GenerateSmoothTerrain(int smoothStep);
 
 	/** Allocates the number width sections*/
 	UPROPERTY()
-		TArray<float> heightValues;
+		TArray<FFloatArray> heightValues;
 };

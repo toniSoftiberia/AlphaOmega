@@ -7,8 +7,18 @@
 /** Sets up the values to generate the landscape*/
 void AProceduralLandscape::GenerateMesh() {
 
+	// Setup example height data
+	int32 NumberOfPoints = (widthSections + 1) * (lenghtSections + 1);
+
+	heightValues.Empty();
+	heightValues.AddDefaulted(widthSections + 1);
+	for (int k = 0; k < widthSections + 1; ++k)
+		heightValues[k].childs.AddDefaulted(lenghtSections + 1);
+	
+		
 	// Generate the height values
-	GenerateHeights();
+	GenerateSmoothTerrain(smoothStep);
+	//GenerateHeights(1);
 
 	// We only need to call the desired method to build the landscape
 	BuildLandscape(size.X, size.Y, widthSections, lenghtSections, heightValues, smoothNormals, useUniqueTexture);
@@ -16,109 +26,127 @@ void AProceduralLandscape::GenerateMesh() {
 
 
 /** Generates the height for the mesh using randomSeed*/
-void AProceduralLandscape::GenerateHeights(){
+void AProceduralLandscape::GenerateHeights(int smoothStep){
 
 	FRandomStream RngStream = FRandomStream::FRandomStream(randomSeed);
-
-	// Setup example height data
-	int32 NumberOfPoints = (widthSections + 1) * (lenghtSections + 1);
+	int32 i,j;
 
 	// Fill height data with random values
-	int32 i,j;
-	for (i = 0; i <= widthSections; i++) 
-		for (j = 0; j <= lenghtSections; j++) {
+	for (i = 0; i <= widthSections;) {
+		for (j = 0; j <= lenghtSections;) {
 
-			float randomValue = RngStream.FRandRange(0, size.Z);
-			int32 heightIndex = (i*(lenghtSections)) + (j);
-			heightValues[heightIndex] = randomValue;
+			heightValues[i][j] = RngStream.FRandRange(0, size.Z);
+
+			for (int k = 1; k < smoothStep; k++)
+				RngStream.FRandRange(0, size.Z);
+
+			j += smoothStep;
 		}
-
-	int32 heightIndex = (i*(lenghtSections)) + (j);
+		i += smoothStep;
+	}
 }
 
 
+/** Generates the height for the mesh using randomSeed*/
+void AProceduralLandscape::GenerateSmoothTerrain(int smoothStep){
+	
+	GenerateHeights(smoothStep);
+
+	int32 i, j;
+	int32 localSmoothStepJ = smoothStep;
+
+	for (i = 0; i < widthSections + 1;i++) {
+		UE_LOG(LogClass, Log, TEXT("i < widthSections + 1 -> %d < %d + 1 = %d"), i, widthSections, i < widthSections + 1);
+		for (j = 0; j < lenghtSections + 1;j++) {
+			UE_LOG(LogClass, Log, TEXT("j < lenghtSections + 1 -> %d < %d + 1 = %d"), j, lenghtSections, j < lenghtSections + 1);
+			localSmoothStepJ = smoothStep;
+
+			UE_LOG(LogClass, Log, TEXT("j %d"), j);
+			UE_LOG(LogClass, Log, TEXT("i %d"), i);
+			int32 backIndex = (j / smoothStep) * smoothStep;
+
+			while (backIndex + localSmoothStepJ > lenghtSections) {
+				--localSmoothStepJ;
+			}
+			UE_LOG(LogClass, Log, TEXT("localSmoothStepJ %d"), localSmoothStepJ);
+						
+				int32 localSmoothStepI = smoothStep;
+						
+				while (i + localSmoothStepI > widthSections) {
+					--localSmoothStepI;
+				}
+			UE_LOG(LogClass, Log, TEXT("j backIndex %d"), backIndex);
+
+			int32 nextIndex = ((j / smoothStep) * (smoothStep)) + localSmoothStepJ;
+			UE_LOG(LogClass, Log, TEXT("j nextIndex %d"), nextIndex);
+
+			float interpolationPosition = (float)(j % smoothStep) / smoothStep;
+			UE_LOG(LogClass, Log, TEXT("interpolationPosition %f"), interpolationPosition);	
+
+			float interpolatedValue = FMath::Lerp(heightValues[i][backIndex], heightValues[i][nextIndex], interpolationPosition);
+			UE_LOG(LogClass, Log, TEXT("interpolatedValue %f"), interpolatedValue);
+
+			heightValues[i][j] = interpolatedValue;
+			UE_LOG(LogClass, Log, TEXT("heightValues[%d][%d] %f"), i, j, heightValues[i][j]);
+
+
+			if ((i % smoothStep == 0) && (j % smoothStep == 0)) {
+
+
+				for (int k = 1; k < localSmoothStepI; k++) {
+
+						
+						UE_LOG(LogClass, Log, TEXT("i localSmoothStep %d"), localSmoothStepI);
+						UE_LOG(LogClass, Log, TEXT("i backIndex %d"), i);
+						UE_LOG(LogClass, Log, TEXT("i nextIndex %d"), i + localSmoothStepI);
+
+						float interpolationPosition = (float)k / localSmoothStepI;
+
+						UE_LOG(LogClass, Log, TEXT("i interpolationPosition %f"), interpolationPosition);
+						if (localSmoothStepI == 0)
+							localSmoothStepI = 1.f;
+
+						interpolatedValue = FMath::Lerp(heightValues[i][j], heightValues[i+ localSmoothStepI][j], interpolationPosition);
+						
+						UE_LOG(LogClass, Log, TEXT("interpolatedValue %f"), interpolatedValue);
+
+						heightValues[i + k -(smoothStep - localSmoothStepI)][j] = interpolatedValue;
+
+						UE_LOG(LogClass, Log, TEXT("heightValues[%d][%d] %f"), i + k - (smoothStep - localSmoothStepI), j, heightValues[i + k - (smoothStep - localSmoothStepI)][j]);
+			
+								
+				}
+			}
+		}
+	}
+}
+
 FVector AProceduralLandscape::GetSmoothFromIndex(int32 i, int32 j) {
-	FVector smooth = FVector::ZeroVector;
-	FVector total = FVector::ZeroVector;
-	//heightIndex = (i*(lenghtSections + 1)) + (j);
-	FVector center = FVector(i, j, heightValues[(i*(lenghtSections + 1)) + (j)]);
+	
 	// We use the top vertex for the first and we rotate clockwise
-	FVector p0 = FVector::ForwardVector * size.X / widthSections + center;
-	if (i < lenghtSections) {
-		if (i == 1 && j == 1)
-		UE_LOG(LogClass, Log, TEXT("i < lenghtSections"));
-		p0 = FVector(size.Y / lenghtSections, 0, heightValues[((i + 1) * (lenghtSections + 1)) + (j)]);
-	}
+	// By default we use the vector direction for distance between vertex
+	FVector v0 = FVector::ForwardVector * size.X / widthSections;
+	if (i < widthSections)
+		v0 = FVector(size.X / widthSections, 0, heightValues[i + 1][j]);
 	
-	FVector p1 = FVector::RightVector * size.Y / lenghtSections  + center;
-	if (j < widthSections) {
-		if (i == 1 && j == 1)
-		UE_LOG(LogClass, Log, TEXT("J < widthSections"));
-		p1 = FVector(0 ,1 *size.X / widthSections, heightValues[(i* (lenghtSections + 1)) + (j + 1)]);
-	}
-	FVector p2 = -FVector::ForwardVector * size.X / widthSections + center;
-	if (i > 0) {
-		if (i == 1 && j == 1)
-		UE_LOG(LogClass, Log, TEXT("i > 0"));
-		p2 = FVector(-size.Y / lenghtSections, 0, heightValues[((i - 1) * (lenghtSections + 1)) + j]);
-	}
-	FVector p3 = -FVector::RightVector * size.Y / lenghtSections + center;
-	if (j > 0) {
-		if (i == 1 && j == 1)
-		UE_LOG(LogClass, Log, TEXT("j > 0"));
-		p3 = FVector(0, -1 * size.X / widthSections, heightValues[(i * (lenghtSections + 1)) + (j - 1)]);
-	}
-
-	FVector vn0 = p0;
-	FVector vn1 = p1;
-	FVector vn2 = p2;
-	FVector vn3 = p3;
-
-	FVector v0 = vn0.GetSafeNormal();
-	FVector v1 = vn1.GetSafeNormal();
-	FVector v2 = vn2.GetSafeNormal();
-	FVector v3 = vn3.GetSafeNormal();
-
-
-	FVector n0 = FVector::CrossProduct(v0, v1);
-	FVector n1 = FVector::CrossProduct(v1, v2);
-	FVector n2 = FVector::CrossProduct(v2, v3);
-	FVector n3 = FVector::CrossProduct(v3, v0);
-	FVector nn0 = FVector::CrossProduct(v0, v1).GetSafeNormal();
-	FVector nn1 = FVector::CrossProduct(v1, v2).GetSafeNormal();
-	FVector nn2 = FVector::CrossProduct(v2, v3).GetSafeNormal();
-	FVector nn3 = FVector::CrossProduct(v3, v0).GetSafeNormal();
-
-	FVector average = (n0 + n1 + n2 + n3) / 4;
+	FVector v1 = FVector::RightVector * size.Y / lenghtSections;
+	if (j < lenghtSections)
+		v1 = FVector(0 ,size.Y / lenghtSections, heightValues[i][j + 1]);
 	
-	if (i == 1 && j == 1) {
-		UE_LOG(LogClass, Log, TEXT("x: %d"), i);
-		UE_LOG(LogClass, Log, TEXT("y: %d"), j);
-		UE_LOG(LogClass, Log, TEXT("center: %s"), *center.ToCompactString());
-		UE_LOG(LogClass, Log, TEXT("z: %d"), (i*(lenghtSections + 1)) + (j));
-		UE_LOG(LogClass, Log, TEXT("p0: %s"), *p0.ToCompactString());
-		UE_LOG(LogClass, Log, TEXT("p1: %s"), *p1.ToCompactString());
-		UE_LOG(LogClass, Log, TEXT("p2: %s"), *p2.ToCompactString());
-		UE_LOG(LogClass, Log, TEXT("p3: %s"), *p3.ToCompactString());
-		UE_LOG(LogClass, Log, TEXT("vn0: %s"), *vn0.ToCompactString());
-		UE_LOG(LogClass, Log, TEXT("vn1: %s"), *vn1.ToCompactString());
-		UE_LOG(LogClass, Log, TEXT("vn2: %s"), *vn2.ToCompactString());
-		UE_LOG(LogClass, Log, TEXT("vn3: %s"), *vn3.ToCompactString());
-		UE_LOG(LogClass, Log, TEXT("v0: %s"), *v0.ToCompactString());
-		UE_LOG(LogClass, Log, TEXT("v1: %s"), *v1.ToCompactString());
-		UE_LOG(LogClass, Log, TEXT("v2: %s"), *v2.ToCompactString());
-		UE_LOG(LogClass, Log, TEXT("v3: %s"), *v3.ToCompactString());
-		UE_LOG(LogClass, Log, TEXT("n0: %s"), *n0.ToCompactString());
-		UE_LOG(LogClass, Log, TEXT("n1: %s"), *n1.ToCompactString());
-		UE_LOG(LogClass, Log, TEXT("n2: %s"), *n2.ToCompactString());
-		UE_LOG(LogClass, Log, TEXT("n3: %s"), *n3.ToCompactString());
-		UE_LOG(LogClass, Log, TEXT("n0: %s"), *nn0.ToCompactString());
-		UE_LOG(LogClass, Log, TEXT("n1: %s"), *nn1.ToCompactString());
-		UE_LOG(LogClass, Log, TEXT("n2: %s"), *nn2.ToCompactString());
-		UE_LOG(LogClass, Log, TEXT("n3: %s"), *nn3.ToCompactString());
-		UE_LOG(LogClass, Log, TEXT("average: %s"), *average.ToCompactString());
-	}
+	FVector v2 = -FVector::ForwardVector * size.X / widthSections;
+	if (i > 0) 
+		v2 = FVector(-size.X / widthSections, 0, heightValues[i - 1][j]);
+	
+	FVector v3 = -FVector::RightVector * size.Y / lenghtSections;
+	if (j > 0) 
+		v3 = FVector(0, -size.Y / lenghtSections, heightValues[i][j - 1]);
 
-	return average;
+	// Calculate the new normals
+	FVector n0 = FVector::CrossProduct(v0, v1).GetSafeNormal();
+	FVector n1 = FVector::CrossProduct(v1, v2).GetSafeNormal();
+	FVector n2 = FVector::CrossProduct(v2, v3).GetSafeNormal();
+	FVector n3 = FVector::CrossProduct(v3, v0).GetSafeNormal();
+
+	return (n0 + n1 + n2 + n3) / 4;
  }
 
