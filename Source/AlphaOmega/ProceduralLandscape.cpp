@@ -67,19 +67,19 @@ void AProceduralLandscape::PrecalculateSmoothNormals() {
 
 			// We use the top vertex for the first and we rotate clockwise
 			// By default we use the vector direction for distance between vertex
-			FVector v0 = FVector::ForwardVector * widthStep;
+			FVector v0 = (FVector::ForwardVector * widthStep) + FVector(0.f, 0.f, heightValues[i][j]);
 			if (i < widthSections)
 				v0 = FVector(widthStep, 0, heightValues[i + 1][j]);
 
-			FVector v1 = FVector::RightVector * lengthStep;
+			FVector v1 = (FVector::RightVector * lengthStep) + FVector(0.f, 0.f, heightValues[i][j]);
 			if (j < lenghtSections)
 				v1 = FVector(0, lengthStep, heightValues[i][j + 1]);
 
-			FVector v2 = -FVector::ForwardVector * widthStep;
+			FVector v2 = (-FVector::ForwardVector * widthStep) + FVector(0.f, 0.f, heightValues[i][j]);
 			if (i > 0)
 				v2 = FVector(-widthStep, 0, heightValues[i - 1][j]);
 
-			FVector v3 = -FVector::RightVector * lengthStep;
+			FVector v3 = -(FVector::RightVector * lengthStep) + FVector(0.f, 0.f, heightValues[i][j]);
 			if (j > 0)
 				v3 = FVector(0, -lengthStep, heightValues[i][j - 1]);
 

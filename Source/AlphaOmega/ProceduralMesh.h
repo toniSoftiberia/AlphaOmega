@@ -71,7 +71,10 @@ public:
 	void BuildTriangle(	FVector vertexA, FVector vertexB, FVector vertexC);
 
 	/** Generates a quad from input vertices*/
-	void BuildQuad(	FVector bottomLeft, FVector bottomRight, FVector topRight, FVector topLeft);
+	void BuildQuad(FVector bottomLeft, FVector bottomRight, FVector topRight, FVector topLeft);
+
+	/** Generates a quad from input vertices, the top vertex in Z axis will allays be only part of the top triangle*/
+	void BuildQuadOriented(FVector bottomLeft, FVector bottomRight, FVector topRight, FVector topLeft);
 
 	/** Generates a cube of cubesize size*/
 	void BuildCube(	FVector cubeSize);

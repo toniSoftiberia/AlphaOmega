@@ -180,6 +180,61 @@ void AProceduralMesh::BuildQuad(FVector bottomLeft, FVector bottomRight, FVector
 }
 
 
+/** Generates a quad from input vertices*/
+void AProceduralMesh::BuildQuadOriented(FVector bottomLeft, FVector bottomRight, FVector topRight, FVector topLeft) {
+
+	int32 index1 = vertexOffset++;
+	int32 index2 = vertexOffset++;
+	int32 index3 = vertexOffset++;
+	int32 index4 = vertexOffset++;
+
+	vertices.Add(bottomLeft);
+	vertices.Add(bottomRight);
+	vertices.Add(topRight);
+	vertices.Add(topLeft);
+
+	UV0s.Add(FVector2D(0.0f, 1.0f));
+	UV0s.Add(FVector2D(1.0f, 1.0f));
+	UV0s.Add(FVector2D(1.0f, 0.0f));
+	UV0s.Add(FVector2D(0.0f, 0.0f));
+
+	// Here we have to indicate 2 triangles
+	// We calculate how to divide the triangle
+	if (bottomRight.Z > FMath::Max(bottomLeft.Z, topRight.Z) || topLeft.Z > FMath::Max(bottomLeft.Z, topRight.Z)) {
+		triangles.Add(index1);
+		triangles.Add(index2);
+		triangles.Add(index3);
+		triangles.Add(index1);
+		triangles.Add(index3);
+		triangles.Add(index4);
+	}
+	else {
+		triangles.Add(index1);
+		triangles.Add(index2);
+		triangles.Add(index4);
+		triangles.Add(index2);
+		triangles.Add(index3);
+		triangles.Add(index4);
+	}
+
+	// By default all normals look at the same way
+	FVector	normal = FVector::CrossProduct(topRight - topLeft, bottomLeft - topLeft).GetSafeNormal();
+	normals.Add(normal);
+	normals.Add(normal);
+	normals.Add(normal);
+	normals.Add(normal);
+
+	// Tangents (perpendicular to the surface)
+	FVector SurfaceTangent = bottomLeft - bottomRight;
+	SurfaceTangent = SurfaceTangent.GetSafeNormal();
+	FProcMeshTangent tangent = FProcMeshTangent(SurfaceTangent, true);
+	tangents.Add(tangent);
+	tangents.Add(tangent);
+	tangents.Add(tangent);
+	tangents.Add(tangent);
+}
+
+
 /** Generates a cube of cubesize size*/
 void AProceduralMesh::BuildCube(FVector cubeSize){
 
@@ -543,7 +598,7 @@ void AProceduralMesh::BuildLandscape(float sizeX, float sizeY, int32 widthSectio
 				FVector p2 = FVector(widthStep * (i + 1) - (sizeX / 2), lengthStep * (j + 1) - (sizeY / 2), heightValues[i + 1][j + 1]);
 				FVector p3 = FVector(widthStep * (i + 1) - (sizeX / 2), lengthStep * j - (sizeY / 2), heightValues[i + 1][j]);
 
-				BuildQuad(p0, p1, p2, p3);
+				BuildQuadOriented(p0, p1, p2, p3);
 
 				// If we use a unique texture, we need to recalculate the UVs using UVwidthStep & UVlengthStep
 				if (useUniqueTexture) {
