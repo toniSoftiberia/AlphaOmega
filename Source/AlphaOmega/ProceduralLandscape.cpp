@@ -114,9 +114,10 @@ void AProceduralLandscape::InterpolateTerrain(int smoothStep) {
 			int32 nextIndex = backIndex + localSmoothStep;
 			// Position between next and back
 			float interpolationPosition = (float)(j % smoothStep) / smoothStep;
-
+			if (smoothInterpolation)
+				interpolationPosition = FMath::SmoothStep(backIndex, nextIndex, j);
 			// Assing the interpolated value to the array
-			heightValues[i][j] = FMath::Lerp(heightValues[i][backIndex], heightValues[i][nextIndex], interpolationPosition);
+			heightValues[i][j] = InterpolateVertex(heightValues[i][backIndex], heightValues[i][nextIndex], interpolationPosition);
 
 			// If we are in a node we need to interpolate in X direction to
 			if ((i % smoothStep == 0) && (j % smoothStep == 0)) {
@@ -132,13 +133,64 @@ void AProceduralLandscape::InterpolateTerrain(int smoothStep) {
 
 					// Position between next and back, note that we allways use smoothStep here for better smoothing, if we use localSmoothStep it will go to 0 faster
 					interpolationPosition = (float)k / smoothStep;
+					if (smoothInterpolation)
+						interpolationPosition = FMath::SmoothStep(i, i + smoothStep, i + k);
 
 					// Assing the interpolated value to the array
-					heightValues[i + k][j] = FMath::Lerp(heightValues[i][j], heightValues[i + localSmoothStep][j], interpolationPosition);
+					heightValues[i + k][j] = InterpolateVertex(heightValues[i][j], heightValues[i + localSmoothStep][j], interpolationPosition);
 				}
 			}
 		}
 	}
+}
+
+/** Makes the interpolation between a and b using alpha and the interpolation mode desired*/
+float AProceduralLandscape::InterpolateVertex(const float a, const float b, const float alpha) {
+
+	// Call the desired method to interpolate
+	switch (interpolationMode) {
+
+	case EInterpolationModes::IM_Circular_in:
+		return FMath::InterpCircularIn(a, b, alpha);
+
+	case EInterpolationModes::IM_Circular_out:
+		return FMath::InterpCircularOut(a, b, alpha);
+
+	case EInterpolationModes::IM_Circular_in_out:
+		return FMath::InterpCircularInOut(a, b, alpha);
+
+	case EInterpolationModes::IM_Ease_in:
+		return FMath::InterpEaseIn(a, b, alpha, exponential);
+
+	case EInterpolationModes::IM_Ease_out:
+		return FMath::InterpEaseOut(a, b, alpha, exponential);
+
+	case EInterpolationModes::IM_Ease_in_out:
+		return FMath::InterpEaseInOut(a, b, alpha, exponential);
+
+	case EInterpolationModes::IM_Expo_in:
+		return FMath::InterpExpoIn(a, b, alpha);
+
+	case EInterpolationModes::IM_Expo_out:
+		return FMath::InterpExpoOut(a, b, alpha);
+
+	case EInterpolationModes::IM_Expo_in_out:
+		return FMath::InterpExpoInOut(a, b, alpha);
+
+	case EInterpolationModes::IM_Sin_in:
+		return FMath::InterpSinIn(a, b, alpha);
+
+	case EInterpolationModes::IM_Sin_out:
+		return FMath::InterpSinOut(a, b, alpha);
+
+	case EInterpolationModes::IM_Sin_in_out:
+		return FMath::InterpSinInOut(a, b, alpha);
+
+	case EInterpolationModes::IM_Linear:
+	default:
+		return FMath::Lerp(a, b, alpha);
+	}
+
 }
 
 /** Generates the height for the mesh using randomSeed*/

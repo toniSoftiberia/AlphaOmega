@@ -14,8 +14,8 @@
 * Store the different variables that make up a vertex
 */
 USTRUCT()
-struct FProceduralVertex
-{
+struct FProceduralVertex{
+
 	GENERATED_USTRUCT_BODY()		
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Procedural Parameters")
@@ -47,12 +47,13 @@ struct FProceduralVertex
 	}
 };
 
+
 /**
 * Two dimensional array of floats
 */
 USTRUCT()
-struct FFloatArray
-{
+struct FFloatArray{
+
 	GENERATED_USTRUCT_BODY()
 
 		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Procedural Parameters")
@@ -67,12 +68,13 @@ struct FFloatArray
 	}
 };
 
+
 /**
 * Two dimensional array of FVector
 */
 USTRUCT()
-struct FVectorArray
-{
+struct FVectorArray{
+
 	GENERATED_USTRUCT_BODY()
 
 		UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Procedural Parameters")
@@ -89,11 +91,37 @@ struct FVectorArray
 
 
 /**
+* Enum to identify the different types of interpolation we have to add BlueprintType to allow use it on editor
+*/
+UENUM(BlueprintType)
+enum class EInterpolationModes : uint8 {
+
+	IM_Circular_in 	UMETA(DisplayName = "Circular In"), // InterpCircularIn
+	IM_Circular_out 	UMETA(DisplayName = "Circular Out"), // InterpCircularOut
+	IM_Circular_in_out 	UMETA(DisplayName = "Circular In/Out"), // InterpCircularInOut
+
+	IM_Ease_in 	UMETA(DisplayName = "Ease In"), // InterpEaseIn
+	IM_Ease_out 	UMETA(DisplayName = "Ease Out"), // InterpEaseOut
+	IM_Ease_in_out 	UMETA(DisplayName = "Ease In/Out"), // InterpEaseInOut
+
+	IM_Expo_in 	UMETA(DisplayName = "Expo In"), // InterpExpoIn
+	IM_Expo_out 	UMETA(DisplayName = "Expo Out"), // InterpExpoOut
+	IM_Expo_in_out 	UMETA(DisplayName = "Expo In/Out"), // InterpExpoInOut
+
+	IM_Sin_in 	UMETA(DisplayName = "Sin In"), // InterpSinIn
+	IM_Sin_out 	UMETA(DisplayName = "Sin Out"), // InterpSinOut
+	IM_Sin_in_out 	UMETA(DisplayName = "Sin In/Out"), // InterpSinInOut
+
+	IM_Linear UMETA(DisplayName = "Linear")
+};
+
+
+/**
  * Here we allocate the static common functions for the project
  */
 UCLASS()
-class ALPHAOMEGA_API UProceduralUtils : public UObject
-{
+class ALPHAOMEGA_API UProceduralUtils : public UObject{
+
 	GENERATED_BODY()
 	
 public:

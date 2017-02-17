@@ -46,6 +46,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
 		int smoothStep = 1;
 
+	/** Handles the interpolation mode*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
+		EInterpolationModes interpolationMode = EInterpolationModes::IM_Linear;
+
+	/** Determines the degree of the curve when we interpolate ease*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
+		float exponential = 1.f;
+
+	/** Determines if the interpolation between points is smoothed or not*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Procedural Parameters")
+		bool smoothInterpolation;
+
 	/** Returns the smooth value of desired index*/
 		FVector GetSmoothFromIndex(int32 i, int32 j);
 
@@ -62,6 +74,9 @@ private:
 
 	/** With the heigth generated we need to calculate the blank positions with interpolation*/
 	void InterpolateTerrain(int smoothStep);
+
+	/** Makes the interpolation between A and B using alpha and the interpolation mode desired*/
+	float InterpolateVertex(const float a, const float b, const float alpha);
 
 	/** Allocates the number width sections*/
 	UPROPERTY()
